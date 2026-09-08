@@ -31,7 +31,7 @@ try:
     from backend.merger import merge_results
     from backend.rules_engine import build_compliance_report, check_rules
     from backend.report_gen import generate_docx, generate_pdf
-    from backend.link_scraper import fetch_product_image_and_metadata
+    from backend.link_scraper import fetch_product_image_and_metadata, fetch_all_product_candidate_images
     from backend import supabase_client
 except ModuleNotFoundError:
     from image_quality import check_image_quality
@@ -40,7 +40,7 @@ except ModuleNotFoundError:
     from merger import merge_results
     from rules_engine import build_compliance_report, check_rules
     from report_gen import generate_docx, generate_pdf
-    from link_scraper import fetch_product_image_and_metadata
+    from link_scraper import fetch_product_image_and_metadata, fetch_all_product_candidate_images
     import supabase_client
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -101,54 +101,148 @@ async def scan(
             except Exception as e:
                 logger.warning("Could not fetch page metadata from product link: %s", e)
     else:
-        # Only product link provided
+        # Only product link provided: fetch all candidate gallery images and evaluate all
         try:
-            image_bytes, ext, page_metadata = await fetch_product_image_and_metadata(product_link)
-        except ValueError as e:
-            raise HTTPException(422, str(e))
-        except Exception as e:
-            logger.error({"error": str(e)}, "Error downloading product image from link")
-            raise HTTPException(502, f"Failed to download product image from link: {e}")
+            candidates, page_metadata = await fetch_all_product_candidate_images(product_link, max_candidates=5)
+        except Exception:
+            # Fallback to single image fetch if fetch_all fails or is mocked
+            try:
+                img_bytes, ext, page_metadata = await fetch_product_image_and_metadata(product_link)
+                candidates = [{"content": img_bytes, "ext": ext, "score": 0, "url": product_link}]
+            except ValueError as e:
+                raise HTTPException(422, str(e))
+            except Exception as e:
+                logger.error({"error": str(e)}, "Error downloading product image from link")
+                raise HTTPException(502, f"Failed to download product image from link: {e}")
 
-        save_path = str(UPLOADS_DIR / f"{scan_id}.{ext}")
-        with open(save_path, "wb") as f:
-            f.write(image_bytes)
+        if not candidates:
+            raise HTTPException(422, "No downloadable product images found at link.")
 
-    # Quality check
-    is_ok, reason = check_image_quality(save_path)
-    if not is_ok:
-        # For scraped product images, ignore sharpness check if resolution is sufficient
-        is_scraped = not (image and image.filename)
-        if is_scraped and "sharpness" in reason:
-            logger.warning("Scraped image sharpness lower than threshold, proceeding: %s", reason)
+        # Save all candidate images temporarily
+        candidate_files = []
+        for idx, cand in enumerate(candidates):
+            c_ext = cand.get("ext", "jpg")
+            c_path = str(UPLOADS_DIR / f"{scan_id}_cand_{idx}.{c_ext}")
+            with open(c_path, "wb") as f:
+                f.write(cand["content"])
+            candidate_files.append({"path": c_path, "ext": c_ext, "cand": cand})
+
+        # Run vision evaluation on all photos concurrently
+        groq_tasks = [extract_fields(cf["path"]) for cf in candidate_files]
+        groq_results = await asyncio.gather(*groq_tasks, return_exceptions=True)
+
+        evaluated_candidates = []
+        for idx, cf in enumerate(candidate_files):
+            g_res = groq_results[idx]
+            if isinstance(g_res, Exception) or not isinstance(g_res, dict):
+                logger.warning("Vision extraction failed for candidate photo %d: %s", idx, g_res)
+                continue
+
+            # Merge with page metadata for pricing/brand if missing
+            cand_merged = dict(g_res)
+            if page_metadata:
+                if not cand_merged.get("mrp") and page_metadata.get("price"):
+                    cand_merged["mrp"] = f"Rs. {page_metadata['price']}"
+                if not cand_merged.get("manufacturer_name") and page_metadata.get("brand"):
+                    cand_merged["manufacturer_name"] = page_metadata["brand"]
+
+            cand_rules = check_rules(cand_merged, RULES_PATH)
+            cand_comp = build_compliance_report(cand_rules)
+            cand_score = cand_comp.get("score", 0)
+
+            # Count non-null printed statutory fields
+            extracted_count = sum(1 for k, v in g_res.items() if v and not k.startswith("_"))
+
+            evaluated_candidates.append({
+                "cf": cf,
+                "groq_result": g_res,
+                "score": cand_score,
+                "extracted_count": extracted_count,
+            })
+
+        if not evaluated_candidates:
+            # Fallback to the first candidate if all vision calls failed
+            winner_cf = candidate_files[0]
+            winner_groq = {}
         else:
+            # Sort by compliance score descending, then by extracted count descending
+            evaluated_candidates.sort(key=lambda x: (x["score"], x["extracted_count"]), reverse=True)
+            winner = evaluated_candidates[0]
+            winner_cf = winner["cf"]
+            winner_groq = winner["groq_result"]
+            logger.info(
+                "Audited %d product photos from link. Winning photo selected: score=%d (url=%s)",
+                len(evaluated_candidates),
+                winner["score"],
+                winner_cf["cand"].get("url", "unknown"),
+            )
+
+        # Move the winning photo to the final scan_id path — ONLY the winning image is displayed
+        ext = winner_cf["ext"]
+        save_path = str(UPLOADS_DIR / f"{scan_id}.{ext}")
+        shutil.copyfile(winner_cf["path"], save_path)
+
+        # Clean up temporary candidate files
+        for cf in candidate_files:
+            try:
+                if os.path.exists(cf["path"]) and cf["path"] != save_path:
+                    os.remove(cf["path"])
+            except Exception:
+                pass
+
+        # Run OCR on the winning photo
+        try:
+            ocr_result = await ocr_extract(save_path)
+        except Exception as e:
+            logger.warning("OCR failed on winning photo: %s", e)
+            ocr_result = {}
+
+        # Merge winner's Groq result + OCR
+        merged = merge_results(winner_groq, ocr_result)
+
+        # Enrich missing fields from scraped webpage metadata if available
+        if page_metadata:
+            mrp_entry = merged.get("mrp", {})
+            if isinstance(mrp_entry, dict) and not mrp_entry.get("value") and page_metadata.get("price"):
+                merged["mrp"] = {"value": f"Rs. {page_metadata['price']}", "source": "page_metadata", "needs_review": True}
+            mfg_entry = merged.get("manufacturer_name", {})
+            if isinstance(mfg_entry, dict) and not mfg_entry.get("value") and page_metadata.get("brand"):
+                merged["manufacturer_name"] = {"value": page_metadata["brand"], "source": "page_metadata", "needs_review": True}
+
+        # Run rules on winning image
+        rule_results = check_rules(merged, RULES_PATH)
+        compliance = build_compliance_report(rule_results)
+        image_url = f"/uploads/{scan_id}.{ext}"
+
+    if image and image.filename:
+        # Quality check for uploaded file
+        is_ok, reason = check_image_quality(save_path)
+        if not is_ok:
             if os.path.exists(save_path):
                 os.remove(save_path)
             raise HTTPException(422, reason)
 
-    # Parallel: Groq vision + Tesseract OCR
-    groq_task = extract_fields(save_path)
-    ocr_task = ocr_extract(save_path)
-    groq_result, ocr_result = await asyncio.gather(groq_task, ocr_task)
+        # Parallel: Groq vision + Tesseract OCR
+        groq_task = extract_fields(save_path)
+        ocr_task = ocr_extract(save_path)
+        groq_result, ocr_result = await asyncio.gather(groq_task, ocr_task)
 
-    # Merge
-    merged = merge_results(groq_result, ocr_result)
+        # Merge
+        merged = merge_results(groq_result, ocr_result)
 
-    # Enrich missing fields from scraped webpage metadata if available
-    if page_metadata:
-        mrp_entry = merged.get("mrp", {})
-        if isinstance(mrp_entry, dict) and not mrp_entry.get("value") and page_metadata.get("price"):
-            merged["mrp"] = {"value": f"Rs. {page_metadata['price']}", "source": "page_metadata", "needs_review": True}
-        mfg_entry = merged.get("manufacturer_name", {})
-        if isinstance(mfg_entry, dict) and not mfg_entry.get("value") and page_metadata.get("brand"):
-            merged["manufacturer_name"] = {"value": page_metadata["brand"], "source": "page_metadata", "needs_review": True}
+        # Enrich missing fields from scraped webpage metadata if available
+        if page_metadata:
+            mrp_entry = merged.get("mrp", {})
+            if isinstance(mrp_entry, dict) and not mrp_entry.get("value") and page_metadata.get("price"):
+                merged["mrp"] = {"value": f"Rs. {page_metadata['price']}", "source": "page_metadata", "needs_review": True}
+            mfg_entry = merged.get("manufacturer_name", {})
+            if isinstance(mfg_entry, dict) and not mfg_entry.get("value") and page_metadata.get("brand"):
+                merged["manufacturer_name"] = {"value": page_metadata["brand"], "source": "page_metadata", "needs_review": True}
 
-    # Run rules
-    rule_results = check_rules(merged, RULES_PATH)
-    compliance = build_compliance_report(rule_results)
-
-    # Build response — NOT finalized, officer can edit
-    image_url = f"/uploads/{scan_id}.{ext}"
+        # Run rules
+        rule_results = check_rules(merged, RULES_PATH)
+        compliance = build_compliance_report(rule_results)
+        image_url = f"/uploads/{scan_id}.{ext}"
 
     response = {
         "scan_id": scan_id,

@@ -1,632 +1,915 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabelSure AI — Legal Metrology Compliance Inspection</title>
-    <meta name="description" content="AI/ML Automated Verification for Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #07090e;
-            --card-bg: rgba(15, 23, 42, 0.65);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --emerald-glow: #10b981;
-            --cyan-glow: #06b6d4;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LabelSure AI — Legal Metrology Compliance Inspection</title>
+  <meta name="description" content="Official Legal Metrology Packaged Commodities (LMPC 2011) AI Inspection Portal" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #030712;
+      --card-bg: rgba(15, 23, 42, 0.88);
+      --card-border: rgba(56, 189, 248, 0.22);
+      --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      --cyan-glow: #38bdf8;
+      --blue-accent: #2563eb;
+      --emerald-accent: #34d399;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --heading-gradient: linear-gradient(180deg, #ffffff 30%, #94a3b8 100%);
+      --dropzone-bg: rgba(15, 23, 42, 0.55);
+      --dropzone-border: rgba(56, 189, 248, 0.3);
+      --input-bg: rgba(15, 23, 42, 0.75);
+      --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(30, 58, 138, 0.55) 0%, transparent 70%),
+                    radial-gradient(circle 800px at 15% 10%, rgba(14, 116, 144, 0.3) 0%, transparent 65%),
+                    linear-gradient(180deg, #050d26 0%, #030712 60%, #02040a 100%);
+      --grid-line-color: rgba(56, 189, 248, 0.04);
+      --scrollbar-thumb: rgba(56, 189, 248, 0.35);
+      --scrollbar-track: rgba(15, 23, 42, 0.5);
+    }
 
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    body.light-theme {
+      --bg-color: #f1f5f9;
+      --card-bg: rgba(255, 255, 255, 0.96);
+      --card-border: rgba(96, 165, 250, 0.4);
+      --card-shadow: 0 16px 35px -10px rgba(29, 78, 216, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1);
+      --cyan-glow: #0284c7;
+      --blue-accent: #1d4ed8;
+      --emerald-accent: #059669;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --heading-gradient: linear-gradient(180deg, #0f172a 30%, #1e3a8a 100%);
+      --dropzone-bg: rgba(241, 245, 254, 0.9);
+      --dropzone-border: rgba(96, 165, 250, 0.55);
+      --input-bg: rgba(255, 255, 255, 0.95);
+      --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(191, 219, 254, 0.6) 0%, transparent 70%),
+                    radial-gradient(circle 800px at 15% 10%, rgba(186, 230, 253, 0.5) 0%, transparent 65%),
+                    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+      --grid-line-color: rgba(30, 64, 175, 0.06);
+      --scrollbar-thumb: rgba(29, 78, 216, 0.35);
+      --scrollbar-track: rgba(226, 232, 240, 0.6);
+    }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      transition: background-color 0.2s ease, color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* Ambient Glows & Sparkle Canvas */
-        .bg-canvas-container {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-        }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        .ambient-glows {
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle 700px at 15% 15%, rgba(16, 185, 129, 0.14), transparent 70%),
-                radial-gradient(circle 800px at 85% 20%, rgba(6, 182, 212, 0.12), transparent 70%),
-                radial-gradient(circle 600px at 50% 90%, rgba(16, 185, 129, 0.08), transparent 75%);
-            filter: blur(40px);
-        }
+    /* Custom Responsive Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--cyan-glow); }
 
-        .grid-lines {
-            position: absolute;
-            inset: 0;
-            background-size: 44px 44px;
-            background-image: 
-                linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-            mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
-            -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
-        }
+    .bg-canvas-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .ambient-glows { position: absolute; inset: 0; background: var(--ambient-bg); filter: blur(40px); transition: background 0.3s ease; }
+    .grid-lines {
+      position: absolute; inset: 0; background-size: 32px 32px;
+      background-image: linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+      mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+    }
+    #ocr-stream-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-        #sparkle-canvas {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-        }
+    .hero-heading {
+      font-weight: 800; letter-spacing: -0.03em; background: var(--heading-gradient);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
 
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--card-border);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
+    .main-card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+      box-shadow: var(--card-shadow); backdrop-filter: blur(20px); position: relative;
+    }
 
-        .glass-subtle {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-        }
+    .dropzone-container {
+      background: var(--dropzone-bg); border: 2px dashed var(--dropzone-border); border-radius: 16px;
+      transition: all 0.2s ease; cursor: pointer; position: relative; overflow: hidden;
+    }
+    .dropzone-container:hover, .dropzone-container.dragover {
+      border-color: var(--cyan-glow);
+    }
 
-        .neon-border-indigo {
-            box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25), 0 0 20px -5px rgba(6, 182, 212, 0.2);
-        }
+    .btn-primary {
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #0284c7 100%);
+      box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15); transition: all 0.2s ease;
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px -3px rgba(37, 99, 235, 0.55); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
 
-        .upload-dropzone {
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .upload-dropzone:hover, .upload-dropzone.dragover {
-            border-color: var(--emerald-glow);
-            background: rgba(16, 185, 129, 0.06);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3);
-        }
+    /* ButtonGroup styling */
+    .btn-group {
+      display: inline-flex;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(8px);
+    }
+    body.light-theme .btn-group {
+      background: rgba(255, 255, 255, 0.9);
+    }
+    .btn-group button, .btn-group a {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      border-right: 1px solid var(--card-border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-group button:last-child, .btn-group a:last-child { border-right: none; }
+    .btn-group button:hover, .btn-group a:hover, .btn-group a.active {
+      color: var(--text-main);
+      background: rgba(56, 189, 248, 0.15);
+    }
 
-        .gradient-btn {
-            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%);
-            box-shadow: 0 4px 25px -2px rgba(16, 185, 129, 0.45);
-            transition: all 0.25s ease;
-        }
-        .gradient-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 35px 0 rgba(16, 185, 129, 0.6);
-            filter: brightness(1.1);
-        }
-        .gradient-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        .gradient-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+    /* Attachment Component */
+    .attachment-card {
+      border: 1px solid var(--card-border);
+      background: var(--input-bg);
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .attachment-card:hover { border-color: var(--cyan-glow); }
 
-        /* Scanning Laser Beam Effect */
-        .scan-overlay {
-            position: relative;
-            overflow: hidden;
-        }
-        .laser-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, #10b981 30%, #38bdf8 70%, transparent);
-            box-shadow: 0 0 16px 3px rgba(16, 185, 129, 0.85);
-            animation: scanLaser 1.8s ease-in-out infinite alternate;
-        }
-        @keyframes scanLaser {
-            0% { top: 2%; opacity: 0.8; }
-            100% { top: 96%; opacity: 1; }
-        }
+    /* Airport Baggage / X-Ray Inspection Scanner Viewport */
+    .scanner-viewport {
+      position: relative;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scanner-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .scanner-reticle-tl { position: absolute; top: 8px; left: 8px; width: 12px; height: 12px; border-top: 2px solid var(--cyan-glow); border-left: 2px solid var(--cyan-glow); }
+    .scanner-reticle-tr { position: absolute; top: 8px; right: 8px; width: 12px; height: 12px; border-top: 2px solid var(--cyan-glow); border-right: 2px solid var(--cyan-glow); }
+    .scanner-reticle-bl { position: absolute; bottom: 8px; left: 8px; width: 12px; height: 12px; border-bottom: 2px solid var(--cyan-glow); border-left: 2px solid var(--cyan-glow); }
+    .scanner-reticle-br { position: absolute; bottom: 8px; right: 8px; width: 12px; height: 12px; border-bottom: 2px solid var(--cyan-glow); border-right: 2px solid var(--cyan-glow); }
+    
+    .scanner-laser-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background: linear-gradient(90deg, transparent, var(--cyan-glow), #ffffff, var(--cyan-glow), transparent);
+      box-shadow: 0 0 10px var(--cyan-glow), 0 0 20px var(--cyan-glow);
+      z-index: 15;
+      animation: airportScanSweep 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+    }
+    @keyframes airportScanSweep {
+      0% { top: 3%; opacity: 0.85; }
+      50% { opacity: 1; }
+      100% { top: 96%; opacity: 0.85; }
+    }
 
-        .pulse-dot {
-            animation: pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulseDot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .4; transform: scale(1.15); }
-        }
+    .scanner-hud-text {
+      position: absolute;
+      bottom: 8px;
+      left: 10px;
+      right: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--cyan-glow);
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(4px);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .chip-btn {
-            transition: all 0.15s ease;
-        }
-        .chip-btn:hover {
-            transform: translateY(-1px);
-            background: rgba(16, 185, 129, 0.15);
-            border-color: rgba(16, 185, 129, 0.4);
-            color: #fff;
-        }
-    </style>
+    /* Scales of Justice Logo */
+    .scale-logo-img {
+      filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.4));
+      transform-origin: 50% 20%;
+    }
+    body.light-theme .scale-logo-img { filter: invert(0.85); }
+
+    /* Telemetry Conveyor Circuit (Suzuka Track) */
+    #conveyor-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .conveyor-car {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8, 0 0 14px #38bdf8;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+
+    /* Demo Chip Buttons */
+    .demo-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      border: 1px solid var(--card-border);
+      background: var(--input-bg);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .demo-chip:hover {
+      border-color: var(--cyan-glow);
+      background: rgba(56, 189, 248, 0.12);
+      transform: translateY(-1px);
+    }
+  </style>
 </head>
-<body class="min-h-screen text-slate-100 flex flex-col justify-between p-4 md:p-6 antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+<body>
 
-    <!-- Dynamic Starfield & Glow Canvas -->
-    <div class="bg-canvas-container">
-        <div class="ambient-glows"></div>
-        <div class="grid-lines"></div>
-        <canvas id="sparkle-canvas"></canvas>
-    </div>
+  <!-- Background Reticle Canvas -->
+  <div class="bg-canvas-container">
+    <div class="ambient-glows"></div>
+    <div class="grid-lines"></div>
+    <canvas id="ocr-stream-canvas"></canvas>
+  </div>
 
-    <!-- Top Navigation Bar -->
-    <header class="w-full max-w-5xl mx-auto mb-6 relative z-10">
-        <div class="glass-panel rounded-2xl px-5 py-3.5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 p-[1px] shadow-lg shadow-indigo-500/20">
-                    <div class="w-full h-full bg-[#0d1326] rounded-[11px] flex items-center justify-center">
-                        <svg class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-                            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-                            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-                            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-                            <rect x="7" y="7" width="10" height="10" rx="1"></rect>
-                        </svg>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-bold text-base tracking-tight text-white">LabelSure™ AI</span>
-                        <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">LMPC 2011</span>
-                    </div>
-                    <p class="text-xs text-slate-400 font-medium">Department of Consumer Affairs • Legal Metrology Inspection</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400 bg-slate-900/60 px-3 py-1.5 rounded-full border border-slate-800">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
-                    <span>AI Engine Online</span>
-                </div>
-                <a href="/static/dashboard.html" class="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white px-3 py-1.5 rounded-lg glass-subtle hover:border-slate-700 transition">
-                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                    Dashboard
-                </a>
-                <a href="/static/login.html" class="text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Portal Login</a>
-            </div>
+  <div class="relative z-10 flex flex-col justify-between min-h-screen p-3 sm:p-5 max-w-4xl mx-auto">
+    
+    <!-- Header Navigation Bar -->
+    <header class="flex flex-col sm:flex-row items-center justify-between gap-3 py-2.5 px-3.5 sm:px-5 rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-xl mb-4 sm:mb-6">
+      
+      <!-- Brand & Scales of Justice Logo -->
+      <a href="/" class="flex items-center gap-2.5 self-start sm:self-auto">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600/30 to-cyan-500/20 border border-[var(--card-border)] flex items-center justify-center overflow-hidden shrink-0">
+          <img id="scaleLogo" src="/static/logo.png" alt="Scales of Justice" class="w-6 h-6 object-contain scale-logo-img" />
         </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h2 class="text-sm font-bold tracking-tight text-[var(--text-main)]">LabelSure AI</h2>
+            <span class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-blue-500/20 text-blue-400 border border-blue-500/30">LMPC 2011</span>
+          </div>
+          <p class="text-[10px] font-mono text-[var(--text-muted)]">Packaged Commodities Inspector</p>
+        </div>
+      </a>
+
+      <!-- Right Controls: ButtonGroup, Dropdown, Theme Toggle -->
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+        
+        <!-- Navigation ButtonGroup -->
+        <div class="btn-group">
+          <a href="/" class="active">
+            <i data-lucide="scan-line" class="w-3.5 h-3.5"></i>
+            <span>Scan</span>
+          </a>
+          <a href="/static/dashboard.html">
+            <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+            <span>Audits</span>
+          </a>
+          <a href="/static/results.html">
+            <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+            <span>Report</span>
+          </a>
+        </div>
+
+        <!-- Action Dropdown Menu -->
+        <div class="relative inline-block text-left" id="dropdownWrapper">
+          <div class="btn-group">
+            <button type="button" id="moreOptionsBtn" aria-label="More Options">
+              <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <div id="moreOptionsMenu" class="hidden absolute right-0 mt-1.5 w-48 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-2xl shadow-2xl py-1 z-50 text-xs font-mono">
+            <a href="/static/login.html" class="flex items-center gap-2 px-3 py-2 text-[var(--text-main)] hover:bg-white/5 transition">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-[var(--cyan-glow)]"></i>
+              <span>Officer Terminal</span>
+            </a>
+            <button type="button" id="dropdownSampleBtn" class="w-full text-left flex items-center gap-2 px-3 py-2 text-[var(--text-main)] hover:bg-white/5 transition">
+              <i data-lucide="box" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Load Biscuit Sample</span>
+            </button>
+            <div class="my-1 border-t border-[var(--card-border)]"></div>
+            <a href="/health" target="_blank" class="flex items-center gap-2 px-3 py-2 text-[var(--text-main)] hover:bg-white/5 transition">
+              <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>API Health Check</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button type="button" id="themeToggleBtn" class="p-2 rounded-lg border border-[var(--card-border)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-1 transition" title="Toggle Theme">
+          <span id="themeToggleIcon">☀️</span>
+        </button>
+      </div>
+
     </header>
 
-    <!-- Main Container -->
-    <main class="w-full max-w-2xl mx-auto my-auto">
-        <div class="glass-panel rounded-3xl p-6 sm:p-9 neon-border-indigo relative overflow-hidden">
-            
-            <!-- Ambient Glow Spots -->
-            <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Main Scanner View -->
+    <main class="my-auto py-1">
+      
+      <div class="text-center max-w-xl mx-auto mb-3 sm:mb-4">
+        <h1 class="hero-heading text-xl sm:text-3xl font-extrabold mb-1">
+          Packaged Commodity Label Compliance
+        </h1>
+        <p class="text-xs text-[var(--text-muted)] px-2">
+          Statutory inspection under Legal Metrology (Packaged Commodities) Rules, 2011.
+        </p>
+      </div>
 
-            <!-- Header Section -->
-            <div class="text-center mb-6 relative">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-3">
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    Rule 6 & Rule 7 Verification Suite
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
-                    Packaged Commodity Audit
-                </h1>
-                <p class="text-slate-400 text-sm max-w-md mx-auto">
-                    Inspect physical labels or digital marketplace listings for statutory compliance with Indian Legal Metrology Rules.
-                </p>
-            </div>
-
-            <!-- Quick Demo Preset Chips -->
-            <div class="mb-5 pb-4 border-b border-slate-800/80">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-semibold tracking-wider uppercase text-slate-400">⚡ Quick Demo Samples</span>
-                    <span class="text-[11px] text-slate-500">1-click test</span>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button type="button" id="demo-compliant" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
-                        <span class="text-emerald-400 text-sm">✓</span> Domestic FMCG Pack (Compliant)
-                    </button>
-                    <button type="button" id="demo-imported" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
-                        <span class="text-amber-400 text-sm">⚠</span> Imported US Soup (No INR MRP)
-                    </button>
-                    <button type="button" id="demo-cereal" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
-                        <span class="text-cyan-400 text-sm">🥣</span> Try Cereal Label
-                    </button>
-                    <button type="button" id="demo-snack" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
-                        <span class="text-emerald-400 text-sm">🍫</span> Try Energy Bar
-                    </button>
-                </div>
-            </div>
-
-            <form id="scan-form">
-                <!-- Dropzone Zone -->
-                <div id="upload-zone" class="upload-dropzone border-2 border-dashed border-slate-700 rounded-2xl p-6 sm:p-8 text-center cursor-pointer mb-5 relative group bg-slate-900/40">
-                    <div id="upload-prompt">
-                        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <p class="text-slate-200 text-sm font-medium mb-1">
-                            Drop label photo here or <span class="text-indigo-400 underline decoration-indigo-400/50 underline-offset-2">browse files</span>
-                        </p>
-                        <p class="text-slate-500 text-xs">Supports JPG, PNG, WebP • High resolution recommended</p>
-                    </div>
-
-                    <!-- Image Preview Area with Laser Scan Beam -->
-                    <div id="preview-area" class="hidden scan-overlay relative rounded-xl overflow-hidden">
-                        <div id="laser-beam" class="hidden laser-line z-20"></div>
-                        <img id="preview-img" class="mx-auto rounded-xl max-h-64 object-contain shadow-md border border-slate-700/50 bg-black/40">
-                        <div class="mt-3 flex items-center justify-center gap-3">
-                            <span id="file-badge" class="font-mono text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md border border-slate-700 truncate max-w-xs"></span>
-                            <button type="button" id="clear-btn" class="text-rose-400 hover:text-rose-300 text-xs font-semibold px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 transition">
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-
-                    <input type="file" id="file-input" name="image" accept="image/*" class="hidden">
-                </div>
-
-                <!-- Product Link Input (Amazon, Flipkart, Direct Image URL) -->
-                <div class="mb-5">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-slate-300 text-xs font-medium flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                            Product Link (Amazon, Flipkart, E-Commerce, or Image URL)
-                        </label>
-                        <span class="text-[11px] text-slate-500">Optional if photo uploaded</span>
-                    </div>
-                    <input type="url" id="product-link" name="product_link" placeholder="https://www.amazon.in/dp/... or https://domain.com/product"
-                        class="w-full bg-slate-900/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition">
-                    <p class="text-slate-500 text-[11px] mt-1.5">If only a link is given, our scraper downloads the product images and cross-verifies digital declarations.</p>
-                </div>
-
-                <!-- Error Display -->
-                <div id="error-box" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-xl p-3.5 mb-5 flex items-start gap-2.5">
-                    <svg class="w-5 h-5 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <p id="error-text" class="text-rose-300 text-xs font-medium"></p>
-                </div>
-
-                <!-- Progress Terminal Checklist during scan -->
-                <div id="progress-terminal" class="hidden bg-slate-950/80 border border-indigo-500/30 rounded-xl p-3.5 mb-5 font-mono text-xs text-slate-300 space-y-1.5 shadow-inner">
-                    <div class="flex items-center gap-2 text-indigo-400 font-semibold border-b border-slate-800 pb-1.5 mb-1.5">
-                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-                        <span>Multi-Stage Metrology Verification Active</span>
-                    </div>
-                    <div id="step-1" class="flex items-center gap-2 text-slate-400">
-                        <span class="step-icon">○</span> 1. Pre-flight image sharpness & resolution audit...
-                    </div>
-                    <div id="step-2" class="flex items-center gap-2 text-slate-400">
-                        <span class="step-icon">○</span> 2. Groq Multimodal Vision parsing label topography...
-                    </div>
-                    <div id="step-3" class="flex items-center gap-2 text-slate-400">
-                        <span class="step-icon">○</span> 3. OCR Engine cross-referencing printed text & font size...
-                    </div>
-                    <div id="step-4" class="flex items-center gap-2 text-slate-400">
-                        <span class="step-icon">○</span> 4. Rule Engine validating against 16 LMPC 2011 mandates...
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" id="scan-btn" class="gradient-btn w-full py-3.5 rounded-xl text-white font-heading font-semibold text-sm tracking-wide disabled:opacity-40 flex items-center justify-center gap-2" disabled>
-                    <svg id="btn-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span id="btn-text">Audit Product Compliance</span>
-                </button>
-            </form>
+      <!-- Main Card Container (Compact & Bounded) -->
+      <div class="main-card p-3.5 sm:p-5 max-w-2xl mx-auto">
+        
+        <!-- Error Banner -->
+        <div id="errorBanner" class="hidden mb-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
+          <span id="errorMsg">Error processing request.</span>
+          <button type="button" onclick="document.getElementById('errorBanner').classList.add('hidden')" class="font-bold ml-2">✕</button>
         </div>
+
+        <!-- Quick Benchmark Sample Chips (Compact & Fast) -->
+        <div class="mb-3 flex items-center justify-between flex-wrap gap-2 pb-2.5 border-b border-[var(--card-border)]">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1">
+            <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i>
+            Quick Test Samples:
+          </span>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button type="button" id="loadSampleCompliant" class="demo-chip">
+              <span class="text-emerald-400">✓</span> Domestic Pack (Compliant)
+            </button>
+            <button type="button" id="loadSampleImported" class="demo-chip">
+              <span class="text-rose-400">⚠</span> Imported Soup (Violation)
+            </button>
+          </div>
+        </div>
+
+        <!-- Airport Baggage / X-Ray Inspection Scanner Viewport & Dropzone -->
+        <div id="dropzone" class="dropzone-container p-3 sm:p-5 text-center flex flex-col items-center justify-center min-h-[160px]">
+          <input type="file" id="fileInput" accept="image/*" class="hidden" />
+
+          <!-- Active Airport Scanner View (Displayed when image is selected) -->
+          <div id="scannerActiveView" class="hidden w-full flex flex-col items-center">
+            
+            <div class="scanner-viewport w-full max-h-56 sm:max-h-64">
+              <!-- Airport X-Ray Laser Bar -->
+              <div id="scannerLaserBar" class="scanner-laser-bar"></div>
+              
+              <!-- HUD Reticles -->
+              <div class="scanner-overlay">
+                <div class="scanner-reticle-tl"></div>
+                <div class="scanner-reticle-tr"></div>
+                <div class="scanner-reticle-bl"></div>
+                <div class="scanner-reticle-br"></div>
+              </div>
+
+              <!-- Scanned Image -->
+              <img id="previewImg" class="max-h-52 sm:max-h-60 w-auto object-contain rounded-lg p-1.5" alt="Inspecting Product Label" />
+              
+              <!-- Status HUD Tag & Controls -->
+              <div class="scanner-hud-text">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[var(--cyan-glow)] animate-pulse shrink-0"></span>
+                  <span id="hudStatus" class="truncate">OPTICAL SCANNER READY: 300 DPI</span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button type="button" id="rescanSweepBtn" class="hover:text-white transition flex items-center gap-1 text-[9px]" title="Run Scanner Laser Sweep">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                    <span>Sweep</span>
+                  </button>
+                  <button type="button" id="zoomPreviewBtn" class="hover:text-white transition flex items-center gap-1 text-[9px]" title="Open Full Lightbox Modal">
+                    <i data-lucide="maximize-2" class="w-3 h-3"></i>
+                    <span>Zoom</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attachment Metadata Bar with Actions (User's Attachment component) -->
+            <div class="attachment-card w-full mt-2.5">
+              <div class="flex items-center gap-2.5 overflow-hidden">
+                <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 text-[var(--cyan-glow)]">
+                  <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+                </div>
+                <div class="text-left overflow-hidden">
+                  <h4 id="attachmentFileName" class="text-xs font-semibold text-[var(--text-main)] truncate">product_label.jpg</h4>
+                  <p id="attachmentMeta" class="text-[10px] text-[var(--text-muted)] font-mono">Image · Loaded · Ready</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" id="expandAttachBtn" class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--cyan-glow)] hover:bg-white/5 transition" title="Inspect Full Image">
+                  <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button type="button" id="resetBtn" class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 transition" title="Remove image">
+                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Empty State Prompt -->
+          <div id="emptyPrompt" class="flex flex-col items-center py-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-2 text-[var(--cyan-glow)]">
+              <i data-lucide="scan" class="w-6 h-6"></i>
+            </div>
+            <p class="text-xs sm:text-sm font-semibold text-[var(--text-main)] mb-0.5">Drop packaging label photo here or click to browse</p>
+            <p class="text-[11px] text-[var(--text-muted)] mb-2 font-mono">Supports Camera Capture, JPG, PNG, WEBP</p>
+            <span class="text-[11px] font-mono px-3 py-1 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--cyan-glow)]">Browse File or Camera</span>
+          </div>
+
+        </div>
+
+        <!-- E-Commerce Product Link Input (Compact) -->
+        <div class="mt-3">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="link" class="w-3 h-3 text-blue-400"></i>
+              Or Scan via E-Commerce Product Link:
+            </label>
+            <span class="text-[10px] text-[var(--text-muted)] font-mono">Amazon • Flipkart • Blinkit</span>
+          </div>
+          <input type="url" id="productLink" placeholder="https://www.amazon.in/dp/... or marketplace URL" class="w-full px-3 py-2 rounded-xl bg-[var(--input-bg)] border border-[var(--card-border)] text-xs text-[var(--text-main)] focus:outline-none focus:border-[var(--cyan-glow)] transition font-mono" />
+        </div>
+
+        <!-- Submit Button -->
+        <button type="button" id="scanTriggerBtn" class="btn-primary w-full mt-3 py-3 rounded-xl text-white font-bold text-xs sm:text-sm tracking-wider uppercase flex items-center justify-center gap-2.5">
+          <span id="btnSpinner" class="hidden">
+            <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+          <span id="btnText">Initiate Statutory Metrology Scan</span>
+        </button>
+
+        <!-- Live Inspection Pipeline & Telemetry Console (Active during scan) -->
+        <div id="telemetryConsole" class="hidden mt-3 p-3 rounded-xl border border-[var(--card-border)] bg-black/40 font-mono text-xs text-[var(--text-main)]">
+          
+          <div class="flex items-center justify-between pb-2 border-b border-[var(--card-border)] mb-2.5">
+            <div class="flex items-center gap-2 text-[var(--cyan-glow)] font-semibold text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-[var(--cyan-glow)] animate-ping"></span>
+              <span>INSPECTION PIPELINE TELEMETRY</span>
+            </div>
+            
+            <!-- Suzuka Conveyor Circuit in Telemetry Dock -->
+            <div id="conveyor-wrapper" class="flex items-center gap-2 px-2 py-0.5 rounded-lg border border-[var(--card-border)] bg-black/30" title="Automated Conveyor Circuit">
+              <span class="text-[9px] text-[var(--text-muted)]">Conveyor Loop</span>
+              <div class="relative w-16 h-5 flex items-center justify-center">
+                <svg viewBox="0 0 304 112" class="w-16 h-5 text-[var(--cyan-glow)] opacity-80" fill="none">
+                  <path d="M189.142857,4 C227.456875,4 248.420457,4.00974888 256.864191,4.00974888 C263.817211,4.00974888 271.61219,3.69583517 274.986231,6.63061513 C276.382736,7.84531176 279.193529,11.3814152 280.479499,13.4815847 C281.719344,15.5064248 284.841964,20.3571626 275.608629,20.3571626 C265.817756,20.3571626 247.262478,19.9013915 243.955117,19.9013915 C239.27946,19.9013915 235.350655,24.7304885 228.6344,24.7304885 C224.377263,24.7304885 219.472178,21.0304113 214.535324,21.0304113 C207.18393,21.0304113 200.882842,30.4798911 194.124187,30.4798911 C186.992968,30.4798911 182.652552,23.6245972 173.457298,23.6245972 C164.83277,23.6245972 157.191045,31.5424105 157.191045,39.1815359 C157.191045,48.466779 167.088672,63.6623005 166.666679,66.9065088 C166.378668,69.1206889 155.842137,79.2568633 151.508744,77.8570506 C145.044576,75.7689355 109.126667,61.6405346 98.7556561,52.9785141 C96.4766876,51.0750861 89.3680347,39.5769094 83.4195005,38.5221785 C80.6048001,38.0231057 73.0179337,38.7426555 74.4158694,42.6956376 C76.7088819,49.1796531 86.3280337,64.1214904 87.1781062,66.9065088 C88.191957,70.2280995 86.4690152,77.0567847 82.2060607,79.2503488 C79.2489435,80.7719756 73.1324132,82.8858479 64.7015706,83.0708761 C55.1604808,83.2802705 44.4254811,80.401884 39.1722168,80.401884 C25.7762119,80.401884 24.3280517,89.1260466 22.476679,94.4501705 C21.637667,96.8629767 20.4337535,108 33.2301959,108 C37.8976087,108 45.0757044,107.252595 53.4789069,103.876424 C61.8821095,100.500252 122.090049,78.119656 128.36127,75.3523302 C141.413669,69.5926477 151.190142,68.4987755 147.018529,52.0784879 C143.007818,36.291544 143.396957,23.4057975 145.221196,19.6589263 C146.450194,17.1346449 148.420955,14.8552817 153.206723,15.7880203 C155.175319,16.1716965 155.097637,15.0525421 156.757598,11.3860986 C158.417558,7.71965506 161.842736,4.00974888 167.736963,4.00974888 C177.205308,4.00974888 184.938832,4 189.142857,4 Z" id="suzukaTrack" stroke="currentColor" stroke-width="2.5"></path>
+                </svg>
+                <div class="conveyor-car" id="suzukaCar"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Multi-stage Verification Checklist -->
+          <div class="space-y-1 text-[11px]">
+            <div id="step-1" class="flex items-center gap-2 text-slate-400">
+              <span class="step-icon">○</span> 1. Pre-flight image sharpness & resolution audit...
+            </div>
+            <div id="step-2" class="flex items-center gap-2 text-slate-400">
+              <span class="step-icon">○</span> 2. Groq Multimodal Vision parsing label topography...
+            </div>
+            <div id="step-3" class="flex items-center gap-2 text-slate-400">
+              <span class="step-icon">○</span> 3. OCR Engine cross-referencing printed text & font size...
+            </div>
+            <div id="step-4" class="flex items-center gap-2 text-slate-400">
+              <span class="step-icon">○</span> 4. Evaluating against 17 statutory LMPC Rules...
+            </div>
+          </div>
+
+          <!-- Morphing Optical Sensor Geometry -->
+          <div class="mt-2.5 pt-2 border-t border-[var(--card-border)] flex items-center justify-between text-[10px] text-[var(--text-muted)]">
+            <span class="flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Optical AI Calibration Active
+            </span>
+            <div class="w-16 h-5 flex items-center justify-center">
+              <svg viewBox="0 0 304 112" class="w-16 h-5 text-[var(--cyan-glow)]">
+                <g stroke-width="2" stroke="currentColor" stroke-linejoin="round" fill="none">
+                  <polygon id="path-1" points="152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38"></polygon>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
     </main>
 
     <!-- Footer -->
-    <footer class="w-full max-w-5xl mx-auto mt-6 text-center text-slate-500 text-xs">
-        <p>Smart India Hackathon • Problem Statement SIH26034 • Legal Metrology (Packaged Commodities) Rules, 2011</p>
+    <footer class="py-2.5 text-center text-[10px] font-mono text-[var(--text-muted)]">
+      Legal Metrology (Packaged Commodities) Rules, 2011 • PS-SIH26034 Enforcement System
     </footer>
+  </div>
 
-    <script>
-        const API = window.location.origin;
-        const zone = document.getElementById('upload-zone');
-        const fileInput = document.getElementById('file-input');
-        const previewArea = document.getElementById('preview-area');
-        const uploadPrompt = document.getElementById('upload-prompt');
-        const previewImg = document.getElementById('preview-img');
-        const fileBadge = document.getElementById('file-badge');
-        const clearBtn = document.getElementById('clear-btn');
-        const scanBtn = document.getElementById('scan-btn');
-        const btnText = document.getElementById('btn-text');
-        const btnIcon = document.getElementById('btn-icon');
-        const errorBox = document.getElementById('error-box');
-        const errorText = document.getElementById('error-text');
-        const form = document.getElementById('scan-form');
-        const productLinkInput = document.getElementById('product-link');
-        const laserBeam = document.getElementById('laser-beam');
-        const progressTerminal = document.getElementById('progress-terminal');
+  <!-- Image Zoom Lightbox Modal (User can click to inspect high res) -->
+  <div id="imageModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-3" onclick="document.getElementById('imageModal').classList.add('hidden')">
+    <div class="relative max-w-3xl max-h-[90vh] p-1 flex flex-col items-center" onclick="event.stopPropagation()">
+      <div class="w-full flex items-center justify-between mb-2 px-2 text-white font-mono text-xs">
+        <span id="modalFilename">Product Label Inspection View</span>
+        <button type="button" onclick="document.getElementById('imageModal').classList.add('hidden')" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <img id="modalImage" class="max-w-full max-h-[80vh] rounded-xl object-contain border border-[var(--card-border)] bg-black/60 shadow-2xl" />
+    </div>
+  </div>
 
-        let selectedFile = null;
+  <!-- Script Logic -->
+  <script>
+    const API = window.location.origin;
+    let isLightMode = false;
 
-        function updateScanButtonState() {
-            const hasFile = selectedFile !== null;
-            const hasLink = productLinkInput.value.trim().length > 0;
-            scanBtn.disabled = !hasFile && !hasLink;
+    // Theme Switch Handler
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themeToggleIcon = document.getElementById("themeToggleIcon");
 
-            if (hasFile && hasLink) {
-                btnText.textContent = 'Audit Label & Verify E-Commerce Listing';
-            } else if (hasFile) {
-                btnText.textContent = 'Audit Label Compliance';
-            } else if (hasLink) {
-                btnText.textContent = 'Fetch & Audit Product Link';
-            } else {
-                btnText.textContent = 'Audit Product Compliance';
-            }
+    themeToggleBtn.addEventListener("click", () => {
+      isLightMode = !isLightMode;
+      document.body.classList.toggle("light-theme", isLightMode);
+      themeToggleIcon.textContent = isLightMode ? "🌙" : "☀️";
+    });
+
+    // Dropdown toggle
+    const moreOptionsBtn = document.getElementById("moreOptionsBtn");
+    const moreOptionsMenu = document.getElementById("moreOptionsMenu");
+    moreOptionsBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      moreOptionsMenu.classList.toggle("hidden");
+    });
+    window.addEventListener("click", () => {
+      moreOptionsMenu.classList.add("hidden");
+    });
+
+    // 1. Anime.js: Gentle balance oscillation on Scales of Justice Logo
+    if (window.anime) {
+      anime({
+        targets: '#scaleLogo',
+        rotate: [-6, 6],
+        duration: 3200,
+        direction: 'alternate',
+        loop: true,
+        easing: 'easeInOutSine'
+      });
+
+      // 2. Anime.js: Suzuka Conveyor Circuit
+      try {
+        const path = anime.path('#suzukaTrack');
+        anime({
+          targets: '#suzukaCar',
+          translateX: path('x'),
+          translateY: path('y'),
+          easing: 'linear',
+          duration: 4500,
+          loop: true
+        });
+      } catch (e) {}
+
+      // 3. Anime.js: Morphing Optical Polygon
+      try {
+        let toggleState = false;
+        function morphPolygon() {
+          const pts1 = "152,4 170,38 204,56 170,74 152,108 134,74 100,56 134,38";
+          const pts2 = "152,14 185,28 196,56 185,84 152,98 119,84 108,56 119,28";
+          toggleState = !toggleState;
+          anime({
+            targets: '#path-1',
+            points: toggleState ? pts2 : pts1,
+            easing: 'easeInOutQuad',
+            duration: 1200,
+            complete: morphPolygon
+          });
+        }
+        morphPolygon();
+      } catch (e) {}
+    }
+
+    // 4. Background Canvas Particles Stream
+    (function () {
+      const canvas = document.getElementById("ocr-stream-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+      function resize() {
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width * dpr; canvas.height = height * dpr;
+        canvas.style.width = width + "px"; canvas.style.height = height + "px";
+        ctx.scale(dpr, dpr);
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      const LABEL_TOKENS = ["NET QTY 500g", "MRP ₹280.00", "RULE 6(1)(a) PASS", "BATCH: L-2026", "PKD: 08/2026", "PDP: 4.2mm HGT", "ORIGIN: INDIA", "SCHED-V COMPLIANT"];
+      const TOTAL_NODES = window.innerWidth < 640 ? 14 : 28;
+
+      class LabelScanNode {
+        constructor() { this.init(true); }
+        init(randomY = false) {
+          this.x = Math.random() * width;
+          this.y = randomY ? Math.random() * height : height + Math.random() * 40;
+          this.text = LABEL_TOKENS[Math.floor(Math.random() * LABEL_TOKENS.length)];
+          this.type = Math.random() > 0.45 ? "TOKEN" : "RETICLE";
+          this.alpha = Math.random() * 0.4 + 0.1;
+          this.fadeSpeed = (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1);
+          this.vx = (Math.random() - 0.5) * 0.25;
+          this.vy = -(Math.random() * 0.35 + 0.15);
+          this.boxSize = Math.random() * 10 + 12;
+          this.fontSize = 10;
+        }
+        update() {
+          this.x += this.vx; this.y += this.vy; this.alpha += this.fadeSpeed;
+          if (this.alpha >= 0.6) { this.alpha = 0.6; this.fadeSpeed = -Math.abs(this.fadeSpeed); }
+          else if (this.alpha <= 0.08) { this.fadeSpeed = Math.abs(this.fadeSpeed); }
+          if (this.y < -40 || this.x < -40 || this.x > width + 40) { this.init(false); }
+        }
+        draw() {
+          const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+          ctx.save(); ctx.translate(this.x, this.y);
+          if (this.type === "TOKEN") {
+            ctx.font = `600 ${this.fontSize}px 'JetBrains Mono', monospace`;
+            ctx.fillStyle = `rgba(${strokeRgb}, ${this.alpha * 0.8})`;
+            ctx.fillText(this.text, 0, 0);
+          } else {
+            const s = this.boxSize, arm = 3;
+            ctx.strokeStyle = `rgba(${strokeRgb}, ${this.alpha * 0.7})`; ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-s, -s + arm); ctx.lineTo(-s, -s); ctx.lineTo(-s + arm, -s);
+            ctx.moveTo(s - arm, -s); ctx.lineTo(s, -s); ctx.lineTo(s, -s + arm);
+            ctx.moveTo(-s, s - arm); ctx.lineTo(-s, s); ctx.lineTo(-s + arm, s);
+            ctx.moveTo(s - arm, s); ctx.lineTo(s, s); ctx.lineTo(s, -s + arm);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+
+      const nodes = Array.from({ length: TOTAL_NODES }, () => new LabelScanNode());
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < nodes.length; i++) { nodes[i].update(); nodes[i].draw(); }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    // Upload & Airport Scanner View logic
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const emptyPrompt = document.getElementById("emptyPrompt");
+    const scannerActiveView = document.getElementById("scannerActiveView");
+    const previewImg = document.getElementById("previewImg");
+    const attachmentFileName = document.getElementById("attachmentFileName");
+    const attachmentMeta = document.getElementById("attachmentMeta");
+    const hudStatus = document.getElementById("hudStatus");
+    const resetBtn = document.getElementById("resetBtn");
+    const expandAttachBtn = document.getElementById("expandAttachBtn");
+    const zoomPreviewBtn = document.getElementById("zoomPreviewBtn");
+    const rescanSweepBtn = document.getElementById("rescanSweepBtn");
+    const scanTriggerBtn = document.getElementById("scanTriggerBtn");
+    const productLinkInput = document.getElementById("productLink");
+    const errorBanner = document.getElementById("errorBanner");
+    const errorMsg = document.getElementById("errorMsg");
+    const btnSpinner = document.getElementById("btnSpinner");
+    const btnText = document.getElementById("btnText");
+    const imageModal = document.getElementById("imageModal");
+    const modalImage = document.getElementById("modalImage");
+    const modalFilename = document.getElementById("modalFilename");
+    const telemetryConsole = document.getElementById("telemetryConsole");
+    const scannerLaserBar = document.getElementById("scannerLaserBar");
+
+    let selectedFile = null;
+
+    dropzone.addEventListener("click", (e) => {
+      if (!resetBtn.contains(e.target) && !zoomPreviewBtn.contains(e.target) && !rescanSweepBtn.contains(e.target) && !expandAttachBtn.contains(e.target)) {
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        selectedFile = e.target.files[0];
+        displayPreview(selectedFile);
+      }
+    });
+
+    dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        selectedFile = e.dataTransfer.files[0];
+        displayPreview(selectedFile);
+      }
+    });
+
+    function displayPreview(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        modalImage.src = e.target.result;
+        const name = file.name || "scanned_label.png";
+        attachmentFileName.textContent = name;
+        modalFilename.textContent = name;
+        const sizeKb = file.size ? (file.size / 1024).toFixed(1) + " KB" : "820 KB";
+        attachmentMeta.textContent = `${file.type || 'image/png'} · ${sizeKb} · Ready for Optical Scan`;
+        hudStatus.textContent = "OPTICAL SCANNER READY: 300 DPI";
+        emptyPrompt.classList.add("hidden");
+        scannerActiveView.classList.remove("hidden");
+        triggerLaserSweep();
+        if (window.lucide) lucide.createIcons();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function triggerLaserSweep() {
+      scannerLaserBar.style.animation = 'none';
+      void scannerLaserBar.offsetWidth; // trigger reflow
+      scannerLaserBar.style.animation = 'airportScanSweep 1.8s cubic-bezier(0.45, 0, 0.55, 1) 3 alternate';
+    }
+
+    rescanSweepBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      hudStatus.textContent = "OPTICAL RE-SWEEP RUNNING...";
+      triggerLaserSweep();
+      setTimeout(() => {
+        hudStatus.textContent = "OPTICAL SCANNER READY: 300 DPI";
+      }, 3600);
+    });
+
+    resetBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectedFile = null;
+      previewImg.src = "";
+      fileInput.value = "";
+      scannerActiveView.classList.add("hidden");
+      emptyPrompt.classList.remove("hidden");
+      telemetryConsole.classList.add("hidden");
+    });
+
+    function openModal(e) {
+      if (e) e.stopPropagation();
+      if (previewImg.src) {
+        imageModal.classList.remove("hidden");
+      }
+    }
+    zoomPreviewBtn.addEventListener("click", openModal);
+    expandAttachBtn.addEventListener("click", openModal);
+
+    // Preset Benchmarks (Using verified fast local samples)
+    document.getElementById("loadSampleCompliant").addEventListener("click", (e) => {
+      e.stopPropagation();
+      fetchLocalSample("/static/samples/sample_compliant.png", "sample_compliant.png");
+    });
+
+    document.getElementById("loadSampleImported").addEventListener("click", (e) => {
+      e.stopPropagation();
+      fetchLocalSample("/static/samples/sample_imported.jpg", "sample_imported.jpg");
+    });
+
+    document.getElementById("dropdownSampleBtn").addEventListener("click", () => {
+      fetchLocalSample("/static/samples/sample_compliant.png", "sample_compliant.png");
+    });
+
+    async function fetchLocalSample(url, filename) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        selectedFile = new File([blob], filename, { type: blob.type || "image/png" });
+        displayPreview(selectedFile);
+      } catch (err) {
+        showError("Could not load sample. Please upload an image directly.");
+      }
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorBanner.classList.remove("hidden");
+    }
+
+    // Step-by-step progress visualizer
+    function simulateSteps() {
+      const steps = [
+        document.getElementById('step-1'),
+        document.getElementById('step-2'),
+        document.getElementById('step-3'),
+        document.getElementById('step-4'),
+      ];
+      steps.forEach((s, i) => {
+        setTimeout(() => {
+          s.classList.remove('text-slate-400');
+          s.classList.add('text-[var(--cyan-glow)]');
+          s.querySelector('.step-icon').textContent = '▶';
+          if (i > 0) {
+            steps[i-1].classList.remove('text-[var(--cyan-glow)]');
+            steps[i-1].classList.add('text-emerald-400');
+            steps[i-1].querySelector('.step-icon').textContent = '✓';
+          }
+        }, i * 750);
+      });
+    }
+
+    // Submit to /scan
+    scanTriggerBtn.addEventListener("click", async () => {
+      const linkValue = productLinkInput.value.trim();
+
+      if (!selectedFile && !linkValue) {
+        showError("Please upload an image or provide an e-commerce product link.");
+        return;
+      }
+
+      errorBanner.classList.add("hidden");
+      scanTriggerBtn.disabled = true;
+      btnSpinner.classList.remove("hidden");
+      btnText.textContent = "Auditing against LMPC Rules...";
+      hudStatus.textContent = "AI VISION & OCR ANALYSIS IN PROGRESS...";
+      
+      // Activate Airport Scanner Sweep & Telemetry Dock
+      triggerLaserSweep();
+      telemetryConsole.classList.remove("hidden");
+      simulateSteps();
+
+      const formData = new FormData();
+      if (selectedFile) formData.append("image", selectedFile);
+      if (linkValue) formData.append("product_link", linkValue);
+
+      try {
+        const res = await fetch(`${API}/scan`, { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.detail || "Scan failed. Please provide a clear label image.");
+          return;
         }
 
-        zone.addEventListener('click', () => fileInput.click());
-        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
-        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            zone.classList.remove('dragover');
-            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
-        clearBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            resetUpload();
+        // Mark all steps complete
+        ['step-1', 'step-2', 'step-3', 'step-4'].forEach(id => {
+          const el = document.getElementById(id);
+          el.className = 'flex items-center gap-2 text-emerald-400';
+          el.querySelector('.step-icon').textContent = '✓';
         });
 
-        productLinkInput.addEventListener('input', updateScanButtonState);
-        productLinkInput.addEventListener('paste', () => setTimeout(updateScanButtonState, 50));
+        sessionStorage.setItem("scan_result", JSON.stringify(data));
+        setTimeout(() => {
+          window.location.href = "/static/results.html";
+        }, 400);
 
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) { showError('Please select a valid image file (JPG, PNG, WebP).'); return; }
-            if (file.size > 20 * 1024 * 1024) { showError('File exceeds 20MB limit. Please upload a smaller image.'); return; }
-            selectedFile = file;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
-                fileBadge.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-                uploadPrompt.classList.add('hidden');
-                previewArea.classList.remove('hidden');
-                updateScanButtonState();
-                hideError();
-            };
-            reader.readAsDataURL(file);
-        }
+      } catch (err) {
+        showError("Network error. Verify backend server is running at " + API);
+      } finally {
+        scanTriggerBtn.disabled = false;
+        btnSpinner.classList.add("hidden");
+        btnText.textContent = "Initiate Statutory Metrology Scan";
+        hudStatus.textContent = "OPTICAL SCANNER READY";
+      }
+    });
 
-        function resetUpload() {
-            selectedFile = null;
-            fileInput.value = '';
-            uploadPrompt.classList.remove('hidden');
-            previewArea.classList.add('hidden');
-            laserBeam.classList.add('hidden');
-            updateScanButtonState();
-        }
-
-        function showError(msg) { errorText.textContent = msg; errorBox.classList.remove('hidden'); }
-        function hideError() { errorBox.classList.add('hidden'); }
-
-        // Demo Presets Handler
-        document.getElementById('demo-compliant').addEventListener('click', async () => {
-            hideError();
-            try {
-                const res = await fetch('/static/samples/sample_compliant.png');
-                const blob = await res.blob();
-                const file = new File([blob], 'demo_parle_compliant.png', { type: 'image/png' });
-                handleFile(file);
-            } catch {
-                showError('Could not load demo sample. Please upload manually.');
-            }
-        });
-
-        document.getElementById('demo-imported').addEventListener('click', async () => {
-            hideError();
-            try {
-                const res = await fetch('/static/samples/sample_imported.jpg');
-                const blob = await res.blob();
-                const file = new File([blob], 'demo_pacific_soup.jpg', { type: 'image/jpeg' });
-                handleFile(file);
-            } catch {
-                showError('Could not load demo sample. Please upload manually.');
-            }
-        });
-
-        document.getElementById('demo-cereal').addEventListener('click', async () => {
-            hideError();
-            try {
-                const res = await fetch('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80');
-                const blob = await res.blob();
-                const file = new File([blob], 'sample_cereal_nutrition.jpg', { type: 'image/jpeg' });
-                handleFile(file);
-            } catch {
-                showError('Could not load online sample. Please upload manually.');
-            }
-        });
-
-        document.getElementById('demo-snack').addEventListener('click', async () => {
-            hideError();
-            try {
-                const res = await fetch('https://images.unsplash.com/photo-1621996346565-e3d5d6281691?w=800&q=80');
-                const blob = await res.blob();
-                const file = new File([blob], 'sample_energy_bar.jpg', { type: 'image/jpeg' });
-                handleFile(file);
-            } catch {
-                showError('Could not load online sample. Please upload manually.');
-            }
-        });
-
-        /* ====================================================
-           STARFIELD & 4-POINT DIAMOND SPARKLE ENGINE
-           ==================================================== */
-        (function () {
-            const canvas = document.getElementById('sparkle-canvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
-
-            function resize() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                canvas.width = width * dpr;
-                canvas.height = height * dpr;
-                canvas.style.width = width + 'px';
-                canvas.style.height = height + 'px';
-                ctx.scale(dpr, dpr);
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
-            const PALETTE = [
-                'rgba(255, 255, 255,',
-                'rgba(52, 211, 153,', // Emerald
-                'rgba(6, 182, 212,',  // Cyan
-                'rgba(251, 191, 36,'  // Warm Amber
-            ];
-
-            class Sparkle {
-                constructor() { this.init(true); }
-
-                init(randomY = false) {
-                    this.x = Math.random() * width;
-                    this.y = randomY ? Math.random() * height : height + 15;
-                    this.size = Math.random() * 2 + 0.6;
-                    this.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-                    this.alpha = Math.random() * 0.8;
-                    this.fadeSpeed = (Math.random() * 0.012 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
-                    this.vx = (Math.random() - 0.5) * 0.3;
-                    this.vy = -(Math.random() * 0.35 + 0.12);
-                    this.isDiamond = Math.random() < 0.35;
-                    this.spike = this.size * (Math.random() * 2.5 + 2.5);
-                }
-
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    this.alpha += this.fadeSpeed;
-
-                    if (this.alpha >= 1) {
-                        this.alpha = 1;
-                        this.fadeSpeed = -Math.abs(this.fadeSpeed);
-                    } else if (this.alpha <= 0.05) {
-                        this.fadeSpeed = Math.abs(this.fadeSpeed);
-                    }
-
-                    if (this.y < -30 || this.x < -30 || this.x > width + 30) this.init(false);
-                }
-
-                draw() {
-                    const a = Math.max(0, Math.min(1, this.alpha));
-                    ctx.save();
-                    ctx.translate(this.x, this.y);
-
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `${this.color} ${a})`;
-                    ctx.shadowColor = `${this.color} 0.9)`;
-                    ctx.shadowBlur = this.size * 5;
-                    ctx.fill();
-
-                    if (this.isDiamond && a > 0.3) {
-                        const sp = this.spike * a;
-                        const th = Math.max(0.6, this.size * 0.35);
-                        ctx.fillStyle = `${this.color} ${a * 0.95})`;
-
-                        ctx.beginPath();
-                        ctx.moveTo(0, -sp); ctx.lineTo(th, 0); ctx.lineTo(0, sp); ctx.lineTo(-th, 0);
-                        ctx.closePath(); ctx.fill();
-
-                        ctx.beginPath();
-                        ctx.moveTo(-sp, 0); ctx.lineTo(0, th); ctx.lineTo(sp, 0); ctx.lineTo(0, -th);
-                        ctx.closePath(); ctx.fill();
-                    }
-                    ctx.restore();
-                }
-            }
-
-            const sparkles = Array.from({ length: 75 }, () => new Sparkle());
-            function animate() {
-                ctx.clearRect(0, 0, width, height);
-                sparkles.forEach(s => { s.update(); s.draw(); });
-                requestAnimationFrame(animate);
-            }
-            animate();
-        })();
-
-        // Step-by-step progress visualizer
-        function simulateSteps() {
-            const steps = [
-                document.getElementById('step-1'),
-                document.getElementById('step-2'),
-                document.getElementById('step-3'),
-                document.getElementById('step-4'),
-            ];
-            steps.forEach((s, i) => {
-                setTimeout(() => {
-                    s.classList.remove('text-slate-400');
-                    s.classList.add('text-indigo-300');
-                    s.querySelector('.step-icon').textContent = '▶';
-                    if (i > 0) {
-                        steps[i-1].classList.remove('text-indigo-300');
-                        steps[i-1].classList.add('text-emerald-400');
-                        steps[i-1].querySelector('.step-icon').textContent = '✓';
-                    }
-                }, i * 900);
-            });
-        }
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const linkVal = productLinkInput.value.trim();
-
-            if (!selectedFile && !linkVal) {
-                showError('Please upload a product label photo or enter an e-commerce product link.');
-                return;
-            }
-
-            hideError();
-            scanBtn.disabled = true;
-            laserBeam.classList.remove('hidden');
-            progressTerminal.classList.remove('hidden');
-            btnText.textContent = 'Auditing against LMPC Rules…';
-            btnIcon.classList.add('animate-spin');
-
-            simulateSteps();
-
-            const fd = new FormData();
-            if (selectedFile) fd.append('image', selectedFile);
-            if (linkVal) fd.append('product_link', linkVal);
-
-            try {
-                const res = await fetch(`${API}/scan`, { method: 'POST', body: fd });
-                const data = await res.json();
-
-                if (!res.ok) {
-                    showError(data.detail || 'Scan processing failed. Please try again.');
-                    return;
-                }
-
-                // Complete all steps
-                ['step-1', 'step-2', 'step-3', 'step-4'].forEach(id => {
-                    const el = document.getElementById(id);
-                    el.className = 'flex items-center gap-2 text-emerald-400';
-                    el.querySelector('.step-icon').textContent = '✓';
-                });
-
-                // Store result and navigate to results page
-                sessionStorage.setItem('scan_result', JSON.stringify(data));
-                setTimeout(() => {
-                    window.location.href = '/static/results.html';
-                }, 400);
-
-            } catch (err) {
-                showError('Network error connecting to backend API. Please verify the server is running.');
-            } finally {
-                laserBeam.classList.add('hidden');
-                updateScanButtonState();
-                btnIcon.classList.remove('animate-spin');
-            }
-        });
-    </script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
 </body>
 </html>

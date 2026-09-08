@@ -2,184 +2,212 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>LabelSure AI — Officer Enforcement Gateway</title>
     <meta name="description" content="Official Legal Metrology Packaged Commodities (LMPC 2011) AI Inspection Portal">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+        :root {
+            --bg-color: #030712;
+            --card-bg: rgba(15, 23, 42, 0.88);
+            --card-border: rgba(56, 189, 248, 0.25);
+            --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            --cyan-glow: #38bdf8;
+            --blue-accent: #2563eb;
+            --emerald-accent: #34d399;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --heading-gradient: linear-gradient(180deg, #ffffff 30%, #94a3b8 100%);
+            --input-bg: rgba(15, 23, 42, 0.8);
+            --input-border: rgba(56, 189, 248, 0.25);
+            --input-focus-border: #38bdf8;
+            --input-focus-shadow: rgba(56, 189, 248, 0.2);
+            --input-text: #f8fafc;
+            --input-placeholder: #64748b;
+            --toggle-bg: rgba(15, 23, 42, 0.9);
+            --toggle-border: rgba(56, 189, 248, 0.3);
+            --toggle-text: #38bdf8;
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(30, 58, 138, 0.65) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(14, 116, 144, 0.35) 0%, transparent 65%),
+                          linear-gradient(180deg, #050d26 0%, #030712 60%, #02040a 100%);
+            --grid-line-color: rgba(56, 189, 248, 0.05);
+        }
+
+        body.light-theme {
+            --bg-color: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --card-border: rgba(96, 165, 250, 0.45);
+            --card-shadow: 0 20px 40px -10px rgba(29, 78, 216, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --cyan-glow: #0284c7;
+            --blue-accent: #1d4ed8;
+            --emerald-accent: #059669;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --heading-gradient: linear-gradient(180deg, #0f172a 30%, #1e3a8a 100%);
+            --input-bg: rgba(241, 245, 254, 0.95);
+            --input-border: rgba(96, 165, 250, 0.55);
+            --input-focus-border: #1d4ed8;
+            --input-focus-shadow: rgba(29, 78, 216, 0.2);
+            --input-text: #0f172a;
+            --input-placeholder: #94a3b8;
+            --toggle-bg: #ffffff;
+            --toggle-border: #93c5fd;
+            --toggle-text: #1d4ed8;
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(191, 219, 254, 0.7) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(186, 230, 253, 0.6) 0%, transparent 65%),
+                          linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+            --grid-line-color: rgba(30, 64, 175, 0.07);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        body {
-            background-color: #070913;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.16) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.14) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.12) 0px, transparent 50%);
-            background-attachment: fixed;
+        .bg-canvas-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+        .ambient-glows { position: absolute; inset: 0; background: var(--ambient-bg); filter: blur(40px); transition: background 0.3s ease; }
+        .grid-lines {
+            position: absolute; inset: 0; background-size: 36px 36px;
+            background-image: linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+        }
+        #ocr-stream-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+        .main-card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px;
+            box-shadow: var(--card-shadow); backdrop-filter: blur(24px); position: relative; overflow: hidden;
         }
 
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.72);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .input-glow {
-            background: rgba(17, 24, 39, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.25s ease;
-        }
-        .input-glow:focus {
-            outline: none;
-            border-color: #818cf8;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-            background: rgba(17, 24, 39, 0.95);
-        }
-
-        .gradient-btn {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
-            box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.5);
-            transition: all 0.25s ease;
-        }
-        .gradient-btn:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 30px 0 rgba(99, 102, 241, 0.65);
-            filter: brightness(1.1);
-        }
-
-        .demo-bypass-btn {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.15));
-            border: 1px solid rgba(245, 158, 11, 0.35);
+        .custom-input {
+            background-color: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text);
             transition: all 0.2s ease;
         }
-        .demo-bypass-btn:hover {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.25));
-            border-color: rgba(245, 158, 11, 0.6);
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px -5px rgba(245, 158, 11, 0.3);
-        }
+        .custom-input:focus { outline: none; border-color: var(--input-focus-border); box-shadow: 0 0 0 3px var(--input-focus-shadow); }
 
-        .pulse-dot {
-            animation: pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .btn-primary {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #0284c7 100%);
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15); transition: all 0.2s ease;
         }
-        @keyframes pulseDot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .4; transform: scale(1.2); }
+        .btn-primary:hover { transform: translateY(-1px); }
+
+        .scale-logo-img {
+            filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.4));
+            transform-origin: 50% 20%;
         }
+        body.light-theme .scale-logo-img { filter: invert(0.85); }
     </style>
 </head>
-<body class="min-h-screen text-slate-100 flex flex-col justify-between p-4 md:p-6 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+<body>
 
-    <!-- Header / Government Emblem Badge -->
-    <header class="w-full max-w-md mx-auto text-center pt-4">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 font-medium mb-3">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
-            <span>GOVERNMENT OF INDIA • ENFORCEMENT NODE</span>
-        </div>
-        <p class="text-xs text-slate-400 font-medium">Directorate of Legal Metrology • LMPC 2011 AI Inspection System</p>
-    </header>
+    <div class="bg-canvas-container">
+        <div class="ambient-glows"></div>
+        <div class="grid-lines"></div>
+        <canvas id="ocr-stream-canvas"></canvas>
+    </div>
 
-    <!-- Main Auth Card -->
-    <main class="w-full max-w-md mx-auto my-auto py-6">
-        <div class="glass-panel rounded-3xl p-7 sm:p-9 relative overflow-hidden">
-            
-            <div class="absolute -top-16 -right-16 w-36 h-36 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
-
-            <!-- Logo -->
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 p-[1px] shadow-lg shadow-indigo-500/25">
-                    <div class="w-full h-full bg-[#0d1326] rounded-[15px] flex items-center justify-center">
-                        <svg class="w-6 h-6 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                        </svg>
-                    </div>
+    <div class="relative z-10 flex flex-col justify-between min-h-screen p-4 sm:p-6 lg:p-8 max-w-xl mx-auto">
+        <header class="flex items-center justify-between py-3 px-5 rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-xl mb-6">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600/30 to-cyan-500/20 border border-[var(--card-border)] flex items-center justify-center overflow-hidden shrink-0">
+                    <img id="scaleLogo" src="/static/logo.png" alt="Scales of Justice" class="w-7 h-7 object-contain scale-logo-img" />
                 </div>
                 <div>
-                    <h1 class="font-heading font-extrabold text-xl text-white tracking-tight">LabelSure™ AI</h1>
-                    <p class="text-xs text-slate-400 font-mono">OFFICER TERMINAL V2.4</p>
+                    <h2 class="text-sm font-bold tracking-tight text-[var(--text-main)]">LabelSure AI</h2>
+                    <p class="text-[10px] font-mono text-[var(--text-muted)]">Officer Authentication</p>
                 </div>
-            </div>
-
-            <!-- Fast Demo Access Button for Judges -->
-            <div class="mb-6">
-                <button type="button" id="demo-login-btn" class="demo-bypass-btn w-full py-2.5 px-4 rounded-xl flex items-center justify-between text-amber-300 text-xs font-semibold group">
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm">⚡</span>
-                        <span>Hackathon Judge Fast Access</span>
-                    </div>
-                    <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded text-amber-200 group-hover:bg-amber-500/30 transition font-mono">1-CLICK LOGIN →</span>
+            </a>
+            <div class="flex items-center gap-2">
+                <button type="button" id="themeToggleBtn" class="p-2 sm:px-3 sm:py-1.5 rounded-lg border border-[var(--card-border)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-main)] transition">
+                    <span id="themeToggleIcon">☀️</span>
                 </button>
+                <a href="/" class="text-xs font-mono text-[var(--cyan-glow)] hover:underline">← Scanner</a>
             </div>
+        </header>
 
-            <div class="relative flex py-2 items-center mb-6">
-                <div class="flex-grow border-t border-slate-800"></div>
-                <span class="flex-shrink mx-3 text-[10px] text-slate-400 uppercase font-mono tracking-wider">Or Officer Credentials</span>
-                <div class="flex-grow border-t border-slate-800"></div>
-            </div>
-
-            <!-- Form -->
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1.5" for="email">
-                        Official ID / Email
-                    </label>
-                    <input type="email" id="email" required placeholder="officer.verma@lm.gov.in"
-                        class="input-glow w-full px-4 py-2.5 rounded-xl text-white text-xs placeholder-slate-400">
+        <main class="my-auto">
+            <div class="main-card p-6 sm:p-8">
+                <div class="text-center mb-6">
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight mb-1">Legal Metrology Terminal</h1>
+                    <p class="text-xs text-[var(--text-muted)] font-mono">Officer Access Gateway</p>
                 </div>
 
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-xs font-semibold text-slate-300" for="password">
-                            Authentication Key
-                        </label>
-                        <span class="text-[10px] text-slate-400 font-mono">LMPC-PIN</span>
+                <div id="error-box" class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+                    <span id="error-text">Authentication failed.</span>
+                </div>
+
+                <div id="success-box" class="hidden mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs">
+                    Authentication successful! Redirecting...
+                </div>
+
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-mono text-[var(--text-muted)] mb-1 uppercase">Official Email Address</label>
+                        <input type="email" id="email" required placeholder="officer.verma@lm.gov.in" class="custom-input w-full rounded-xl px-4 py-2.5 text-xs font-mono" />
                     </div>
-                    <input type="password" id="password" required placeholder="••••••••••••"
-                        class="input-glow w-full px-4 py-2.5 rounded-xl text-white text-xs placeholder-slate-400">
+                    <div>
+                        <label class="block text-xs font-mono text-[var(--text-muted)] mb-1 uppercase">Password</label>
+                        <input type="password" id="password" required placeholder="••••••••••••" class="custom-input w-full rounded-xl px-4 py-2.5 text-xs font-mono" />
+                    </div>
+
+                    <button type="submit" id="login-btn" class="btn-primary w-full py-3 rounded-xl text-white font-bold text-xs tracking-wider uppercase">
+                        Sign In to Terminal
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-[var(--card-border)] text-center">
+                    <button type="button" id="demo-login-btn" class="w-full py-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-mono font-semibold hover:bg-amber-500/25 transition">
+                        ⚡ Quick Demo Sign In
+                    </button>
                 </div>
-
-                <!-- Error Toast -->
-                <div id="error-box" class="hidden rounded-xl bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-300 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span id="error-text">Authentication failed</span>
-                </div>
-
-                <!-- Success Toast -->
-                <div id="success-box" class="hidden rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs text-emerald-300 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span>Credentials verified. Redirecting to Command Center…</span>
-                </div>
-
-                <button type="submit" id="login-btn" class="gradient-btn w-full py-3 rounded-xl text-white font-semibold text-xs tracking-wide uppercase flex items-center justify-center gap-2 mt-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
-                    <span>Sign In to Terminal</span>
-                </button>
-            </form>
-
-            <div class="mt-6 pt-5 border-t border-slate-800 text-center">
-                <a href="/" class="text-xs text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1.5 transition font-medium">
-                    <span>Direct Scanner Access without sign-in</span>
-                    <span>→</span>
-                </a>
             </div>
+        </main>
 
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="w-full max-w-md mx-auto text-center pb-4">
-        <p class="text-[10px] text-slate-400 font-mono">
-            SECURE RESTRICTED ACCESS • 256-BIT ENCRYPTION • SECTION 36 & 49 LMPC ACT 2011
-        </p>
-    </footer>
+        <footer class="py-4 text-center text-xs font-mono text-[var(--text-muted)]">
+            Legal Metrology (Packaged Commodities) Rules, 2011
+        </footer>
+    </div>
 
     <script>
+        let isLightMode = false;
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+
+        themeToggleBtn.addEventListener("click", () => {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle("light-theme", isLightMode);
+            themeToggleIcon.textContent = isLightMode ? "🌙" : "☀️";
+        });
+
+        if (window.anime) {
+            anime({
+                targets: '#scaleLogo',
+                rotate: [-7, 7],
+                duration: 3200,
+                direction: 'alternate',
+                loop: true,
+                easing: 'easeInOutSine'
+            });
+        }
+
         const SUPABASE_URL = localStorage.getItem('SUPABASE_URL') || '';
         const SUPABASE_KEY = localStorage.getItem('SUPABASE_KEY') || '';
 
@@ -187,12 +215,9 @@
         if (SUPABASE_URL && SUPABASE_KEY) {
             try {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            } catch (e) {
-                console.warn('Supabase init skipped:', e);
-            }
+            } catch (e) {}
         }
 
-        // Fast Hackathon Demo Login Bypass
         document.getElementById('demo-login-btn').addEventListener('click', () => {
             document.getElementById('email').value = 'officer.verma@lm.gov.in';
             document.getElementById('password').value = 'sih2026winner';
@@ -205,10 +230,9 @@
 
             setTimeout(() => {
                 window.location.href = '/static/dashboard.html';
-            }, 600);
+            }, 500);
         });
 
-        // Form Submit
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -221,19 +245,18 @@
             successBox.classList.add('hidden');
 
             if (!supabaseClient) {
-                // Standalone development mode
                 sessionStorage.setItem('user_email', email);
                 sessionStorage.setItem('is_authenticated', 'true');
                 successBox.classList.remove('hidden');
                 setTimeout(() => {
                     window.location.href = '/static/dashboard.html';
-                }, 500);
+                }, 400);
                 return;
             }
 
             const btn = document.getElementById('login-btn');
             btn.disabled = true;
-            btn.innerHTML = 'Verifying Credentials…';
+            btn.textContent = 'Verifying Credentials…';
 
             try {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -241,7 +264,7 @@
                     errorText.textContent = error.message;
                     errorBox.classList.remove('hidden');
                     btn.disabled = false;
-                    btn.innerHTML = 'Sign In to Terminal';
+                    btn.textContent = 'Sign In to Terminal';
                     return;
                 }
 
@@ -250,12 +273,12 @@
                 successBox.classList.remove('hidden');
                 setTimeout(() => {
                     window.location.href = '/static/dashboard.html';
-                }, 500);
+                }, 400);
             } catch (err) {
-                errorText.textContent = err.message || 'Connection timeout';
+                errorText.textContent = err.message || 'Connection error';
                 errorBox.classList.remove('hidden');
                 btn.disabled = false;
-                btn.innerHTML = 'Sign In to Terminal';
+                btn.textContent = 'Sign In to Terminal';
             }
         });
     </script>

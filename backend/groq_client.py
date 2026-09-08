@@ -146,7 +146,7 @@ async def extract_fields(image_path: str) -> dict | None:
                     }
                 ],
                 temperature=0.1,
-                max_tokens=2048,
+                max_tokens=750,
             )
 
             raw = response.choices[0].message.content.strip()

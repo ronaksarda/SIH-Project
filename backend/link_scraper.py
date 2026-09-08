@@ -331,8 +331,11 @@ def score_label_image(image_bytes: bytes) -> int:
         return 0
 
 
-async def fetch_product_image_and_metadata(url: str) -> tuple[bytes, str, dict]:
-    """Fetch product image bytes, file extension, and metadata. Evaluates all candidate gallery images to find the food label."""
+async def fetch_all_product_candidate_images(url: str, max_candidates: int = 6) -> tuple[list[dict], dict]:
+    """Fetch all candidate product images and metadata from product link.
+    Returns: (list_of_candidates, metadata)
+    where each candidate dict contains: {"content": bytes, "ext": str, "score": int, "url": str}
+    """
     import asyncio
     url = url.strip()
     if not url.startswith(("http://", "https://")):
@@ -351,7 +354,7 @@ async def fetch_product_image_and_metadata(url: str) -> tuple[bytes, str, dict]:
                 ext = "webp"
             elif "." in urlparse(url).path:
                 ext = urlparse(url).path.rsplit(".", 1)[-1].lower()
-            return resp.content, ext, {}
+            return [{"content": resp.content, "ext": ext, "score": 0, "url": url}], {}
 
         # Fetch product web page
         resp = await client.get(url)
@@ -360,7 +363,7 @@ async def fetch_product_image_and_metadata(url: str) -> tuple[bytes, str, dict]:
         content_type = resp.headers.get("content-type", "").lower()
         if "image/" in content_type:
             ext = "png" if "png" in content_type else ("webp" if "webp" in content_type else "jpg")
-            return resp.content, ext, {}
+            return [{"content": resp.content, "ext": ext, "score": 0, "url": str(resp.url)}], {}
 
         html = resp.text
         candidates, metadata = extract_image_urls_from_html(html, str(resp.url))
@@ -407,17 +410,19 @@ async def fetch_product_image_and_metadata(url: str) -> tuple[bytes, str, dict]:
                 "Please upload the label photo directly."
             )
 
-        # Sort by label score descending — the image with highest food label/text density is selected
+        # Sort by heuristic label score descending
         valid_candidates.sort(key=lambda c: c["score"], reverse=True)
-        best = valid_candidates[0]
-        logger.info(
-            "Selected food label image from %d candidates (winner score=%d, url=%s)",
-            len(valid_candidates),
-            best["score"],
-            best["url"],
-        )
-        return best["content"], best["ext"], metadata
+        return valid_candidates[:max_candidates], metadata
 
 
-# Alias
+async def fetch_product_image_and_metadata(url: str) -> tuple[bytes, str, dict]:
+    """Fetch product image bytes, file extension, and metadata. Returns the single top heuristic candidate."""
+    candidates, metadata = await fetch_all_product_candidate_images(url, max_candidates=1)
+    if not candidates:
+        raise ValueError("Could not download any product images from link.")
+    best = candidates[0]
+    return best["content"], best["ext"], metadata
+
+
+# Aliases
 extract_image_and_metadata_from_url = fetch_product_image_and_metadata

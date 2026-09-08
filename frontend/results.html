@@ -2,322 +2,655 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LabelSure AI — Compliance Audit Results</title>
-    <meta name="description" content="Legal Metrology LMPC 2011 Compliance Audit Findings, Field Reconciliations and Report Generation">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LabelSure AI — Compliance Audit & Report</title>
+    <meta name="description" content="Legal Metrology Packaged Commodities (LMPC 2011) Official Compliance Audit Findings">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-
-        body {
-            background-color: #070913;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.08) 0px, transparent 50%);
-            background-attachment: fixed;
+        :root {
+            --bg-color: #030712;
+            --card-bg: rgba(15, 23, 42, 0.88);
+            --card-border: rgba(56, 189, 248, 0.22);
+            --card-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            --cyan-glow: #38bdf8;
+            --blue-accent: #2563eb;
+            --emerald-accent: #34d399;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --heading-gradient: linear-gradient(180deg, #ffffff 30%, #94a3b8 100%);
+            --input-bg: rgba(4, 9, 22, 0.75);
+            --input-border: rgba(56, 189, 248, 0.22);
+            --input-focus-border: #38bdf8;
+            --divider-color: rgba(56, 189, 248, 0.12);
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(30, 58, 138, 0.55) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(14, 116, 144, 0.3) 0%, transparent 65%),
+                          linear-gradient(180deg, #050d26 0%, #030712 60%, #02040a 100%);
+            --grid-line-color: rgba(56, 189, 248, 0.04);
+            --scrollbar-thumb: rgba(56, 189, 248, 0.35);
+            --scrollbar-track: rgba(15, 23, 42, 0.5);
         }
 
+        body.light-theme {
+            --bg-color: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --card-border: rgba(96, 165, 250, 0.4);
+            --card-shadow: 0 16px 35px -10px rgba(29, 78, 216, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --cyan-glow: #0284c7;
+            --blue-accent: #1d4ed8;
+            --emerald-accent: #059669;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --heading-gradient: linear-gradient(180deg, #0f172a 30%, #1e3a8a 100%);
+            --input-bg: rgba(241, 245, 254, 0.95);
+            --input-border: rgba(96, 165, 250, 0.5);
+            --input-focus-border: #1d4ed8;
+            --divider-color: rgba(96, 165, 250, 0.25);
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(191, 219, 254, 0.6) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(186, 230, 253, 0.5) 0%, transparent 65%),
+                          linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+            --grid-line-color: rgba(30, 64, 175, 0.06);
+            --scrollbar-thumb: rgba(29, 78, 216, 0.35);
+            --scrollbar-track: rgba(226, 232, 240, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Custom Responsive Scrollbar */
+        ::-webkit-scrollbar, .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track, .custom-scrollbar::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb, .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover, .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--cyan-glow); }
+
+        .bg-canvas-container { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+        .ambient-glows { position: absolute; inset: 0; background: var(--ambient-bg); filter: blur(40px); transition: background 0.3s ease; }
+        .grid-lines {
+            position: absolute; inset: 0; background-size: 32px 32px;
+            background-image: linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+        }
+        #ocr-stream-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
         .glass-panel {
-            background: rgba(15, 23, 42, 0.68);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px;
+            box-shadow: var(--card-shadow); backdrop-filter: blur(20px); position: relative;
         }
 
         .glass-subtle {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--card-border);
+        }
+        body.light-theme .glass-subtle {
+            background: rgba(241, 245, 249, 0.85);
         }
 
-        .gradient-btn {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
-            box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.5);
-            transition: all 0.25s ease;
+        .custom-input {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            transition: all 0.15s ease;
         }
-        .gradient-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px 0 rgba(99, 102, 241, 0.65);
-            filter: brightness(1.1);
+        .custom-input:focus { outline: none; border-color: var(--input-focus-border); }
+
+        .btn-action-primary {
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #0284c7 100%);
+            box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.15s ease;
+        }
+        .btn-action-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 24px -3px rgba(37, 99, 235, 0.55); }
+        .btn-action-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+        /* ButtonGroup Component */
+        .btn-group {
+            display: inline-flex;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(8px);
+        }
+        body.light-theme .btn-group {
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .btn-group button, .btn-group a {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            border-right: 1px solid var(--card-border);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .btn-group button:last-child, .btn-group a:last-child { border-right: none; }
+        .btn-group button:hover, .btn-group a:hover, .btn-group button.active, .btn-group a.active {
+            color: var(--text-main);
+            background: rgba(56, 189, 248, 0.15);
         }
 
-        .download-btn {
-            transition: all 0.2s ease;
+        /* Source Pills */
+        .source-pill-both { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+        .source-pill-groq { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .source-pill-ocr  { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+        .source-pill-none { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+        /* Checkbox Component */
+        .checkbox-field {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        .checkbox-field:hover {
+            border-color: var(--cyan-glow);
+        }
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1.5px solid var(--card-border);
+            background: rgba(2, 6, 23, 0.5);
+            cursor: pointer;
+            display: grid;
+            place-content: center;
+            margin-top: 1px;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+        .custom-checkbox:checked {
+            background-color: #2563eb;
+            border-color: #38bdf8;
+        }
+        .custom-checkbox:checked::before {
+            content: "✓";
+            color: white;
+            font-size: 10px;
+            font-weight: 900;
         }
 
-        .field-card {
-            transition: all 0.2s ease;
+        /* Scales of Justice Logo */
+        .scale-logo-img {
+          filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.4));
+          transform-origin: 50% 20%;
         }
-        .field-card:hover {
-            border-color: rgba(99, 102, 241, 0.35);
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .source-pill-both { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
-        .source-pill-groq { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
-        .source-pill-ocr { background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.3); }
-        .source-pill-none { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-        .score-ring { width: 140px; height: 140px; }
+        body.light-theme .scale-logo-img { filter: invert(0.85); }
     </style>
 </head>
-<body class="min-h-screen text-slate-100 p-4 md:p-8 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+<body>
 
-    <!-- Top Navigation -->
-    <header class="w-full max-w-7xl mx-auto mb-6">
-        <div class="glass-panel rounded-2xl px-5 py-3.5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="/" class="flex items-center gap-2 group">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md">
-                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-                    </div>
-                    <div>
-                        <span class="font-heading font-bold text-sm text-white group-hover:text-indigo-300 transition">← New Inspection</span>
-                        <p class="text-[11px] text-slate-400">Back to Scanner</p>
-                    </div>
-                </a>
-            </div>
+    <div class="bg-canvas-container">
+        <div class="ambient-glows"></div>
+        <div class="grid-lines"></div>
+        <canvas id="ocr-stream-canvas"></canvas>
+    </div>
 
-            <div class="flex items-center gap-3">
-                <span id="scan-id-chip" class="font-mono text-xs px-3 py-1 bg-slate-900/80 rounded-full border border-slate-700/80 text-slate-400">
-                    SCAN ID: <span id="scan-id-text" class="text-indigo-300">--------</span>
-                </span>
-                <a href="/static/dashboard.html" class="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white px-3 py-1.5 rounded-lg glass-subtle hover:border-slate-700 transition">
-                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
-                    Dashboard
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="w-full max-w-7xl mx-auto">
+    <div class="relative z-10 flex flex-col justify-between min-h-screen p-3 sm:p-5 max-w-6xl mx-auto">
         
-        <!-- Empty / No Data State -->
-        <div id="no-data" class="hidden glass-panel rounded-3xl p-16 text-center max-w-md mx-auto my-16">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-800/80 flex items-center justify-center text-slate-500">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            </div>
-            <h2 class="font-heading font-bold text-lg text-white mb-1">No Active Scan Session</h2>
-            <p class="text-xs text-slate-400 mb-6">Upload a label image or supply a product link to run statutory metrology audit.</p>
-            <a href="/" class="gradient-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white">
-                Launch Scanner →
+        <!-- Header Navigation Bar -->
+        <header class="flex flex-col sm:flex-row items-center justify-between gap-3 py-2.5 px-3.5 sm:px-5 rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-xl mb-4 sm:mb-6">
+            <a href="/" class="flex items-center gap-2.5 self-start sm:self-auto">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600/30 to-cyan-500/20 border border-[var(--card-border)] flex items-center justify-center overflow-hidden shrink-0">
+                    <img id="scaleLogo" src="/static/logo.png" alt="Scales of Justice" class="w-6 h-6 object-contain scale-logo-img" />
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h2 class="text-sm font-bold tracking-tight text-[var(--text-main)]">LabelSure AI Audit</h2>
+                        <span id="scan-id-badge" class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-blue-500/20 text-blue-400 border border-blue-500/30">...</span>
+                    </div>
+                    <p class="text-[10px] font-mono text-[var(--text-muted)]">Legal Metrology Rules Enforcement</p>
+                </div>
             </a>
-        </div>
 
-        <!-- Results Grid -->
-        <div id="results-container" class="hidden space-y-6">
-            
-            <!-- Top Hero Overview Card -->
-            <div class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <!-- Right Controls: ButtonGroup & Dropdown -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="btn-group">
+                    <a href="/">
+                        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                        <span>Scan</span>
+                    </a>
+                    <a href="/static/dashboard.html">
+                        <i data-lucide="archive" class="w-3.5 h-3.5"></i>
+                        <span>Audits</span>
+                    </a>
+                </div>
 
-                <div class="grid md:grid-cols-12 gap-6 items-center">
-                    
-                    <!-- Gauge & Score Summary -->
-                    <div class="md:col-span-4 flex flex-col items-center justify-center text-center p-4 border-b md:border-b-0 md:border-r border-slate-800/80">
-                        <div class="relative score-ring mb-3">
-                            <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
-                                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
-                                <circle id="score-circle" cx="60" cy="60" r="50" fill="none" stroke="#4ade80" stroke-width="10" stroke-linecap="round"
-                                    stroke-dasharray="314.16" stroke-dashoffset="314.16" class="transition-all duration-1000 ease-out"/>
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span id="score-value" class="font-heading text-4xl font-extrabold text-white">0</span>
-                                <span class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">Score / 100</span>
-                            </div>
-                        </div>
-
-                        <div id="pass-fail-badge" class="px-4 py-1.5 rounded-full font-heading font-bold text-xs tracking-wider uppercase mb-1.5 shadow-sm">
-                            EVALUATING…
-                        </div>
-                        <p id="rules-summary" class="text-xs text-slate-400 font-medium"></p>
+                <!-- Dropdown Action Button -->
+                <div class="relative inline-block text-left" id="dropdownWrapper">
+                    <div class="btn-group">
+                        <button type="button" id="moreOptionsBtn" aria-label="More Options">
+                            <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
+                            <span class="hidden sm:inline">Actions</span>
+                        </button>
                     </div>
 
-                    <!-- Executive Audit Highlights -->
-                    <div class="md:col-span-8 space-y-4">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                                <span class="text-[11px] font-semibold tracking-wider uppercase text-indigo-400">Statutory Metrology Verification</span>
-                                <h1 id="product-title-header" class="font-heading text-xl sm:text-2xl font-bold text-white tracking-tight">
-                                    Packaged Commodity Findings
-                                </h1>
-                            </div>
-                            <div id="low-confidence-tag" class="hidden px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded-md text-xs flex items-center gap-1.5 font-medium">
-                                <span>⚠ OCR-Only Fallback Active</span>
-                            </div>
-                        </div>
+                    <div id="moreOptionsMenu" class="hidden absolute right-0 mt-1.5 w-44 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] backdrop-blur-2xl shadow-2xl py-1 z-50 text-xs font-mono">
+                        <button type="button" onclick="window.print()" class="w-full text-left flex items-center gap-2 px-3 py-1.5 text-[var(--text-main)] hover:bg-white/5 transition">
+                            <i data-lucide="printer" class="w-3.5 h-3.5 text-blue-400"></i>
+                            <span>Print Audit</span>
+                        </button>
+                        <a href="/static/dashboard.html" class="flex items-center gap-2 px-3 py-1.5 text-[var(--text-main)] hover:bg-white/5 transition">
+                            <i data-lucide="list-filter" class="w-3.5 h-3.5 text-emerald-400"></i>
+                            <span>Audit Registry</span>
+                        </a>
+                        <div class="my-1 border-t border-[var(--card-border)]"></div>
+                        <a href="/" class="flex items-center gap-2 px-3 py-1.5 text-rose-400 hover:bg-rose-500/10 transition">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+                            <span>Discard & Rescan</span>
+                        </a>
+                    </div>
+                </div>
 
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div class="glass-subtle rounded-xl p-3">
-                                <span class="text-[10px] text-slate-400 block mb-0.5">Mandates Passed</span>
-                                <span id="stat-passed-count" class="font-heading text-lg font-bold text-emerald-400">0</span>
-                                <span class="text-[10px] text-slate-500"> / 16 Rules</span>
-                            </div>
-                            <div class="glass-subtle rounded-xl p-3">
-                                <span class="text-[10px] text-slate-400 block mb-0.5">Missing Declarations</span>
-                                <span id="stat-missing-count" class="font-heading text-lg font-bold text-rose-400">0</span>
-                                <span class="text-[10px] text-slate-500"> Mandatory</span>
-                            </div>
-                            <div class="glass-subtle rounded-xl p-3">
-                                <span class="text-[10px] text-slate-400 block mb-0.5">Format Inconsistencies</span>
-                                <span id="stat-format-count" class="font-heading text-lg font-bold text-amber-400">0</span>
-                                <span class="text-[10px] text-slate-500"> Irregularities</span>
-                            </div>
-                            <div class="glass-subtle rounded-xl p-3">
-                                <span class="text-[10px] text-slate-400 block mb-0.5">Audit Framework</span>
-                                <span class="font-heading text-xs font-bold text-indigo-300 block">LMPC 2011</span>
-                                <span class="text-[10px] text-slate-500">Gazette G.S.R. 629</span>
+                <button type="button" id="themeToggleBtn" class="p-2 rounded-lg border border-[var(--card-border)] text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-main)] flex items-center gap-1 transition" title="Toggle Theme">
+                    <span id="themeToggleIcon">☀️</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- No Data State -->
+        <div id="no-data" class="hidden glass-panel p-6 sm:p-10 text-center max-w-sm mx-auto my-auto">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-2 text-[var(--cyan-glow)]">
+                <i data-lucide="search" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-bold mb-1">No Scan Data Found</h3>
+            <p class="text-xs text-[var(--text-muted)] mb-4">Please upload a label image or e-commerce URL first.</p>
+            <a href="/" class="btn-action-primary px-5 py-2.5 rounded-xl text-xs font-bold text-white inline-block">Go to Scanner</a>
+        </div>
+
+        <!-- Main Results Container (Balanced 2-Column Responsive Layout) -->
+        <div id="results-container" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 my-auto">
+            
+            <!-- Left Column: Image, Attachment & Compliance Score -->
+            <div class="lg:col-span-5 flex flex-col gap-3.5">
+                
+                <!-- Package Label Preview & Attachment Bar -->
+                <div class="glass-panel p-3.5 sm:p-4 flex flex-col items-center">
+                    <div class="flex items-center justify-between w-full mb-2">
+                        <span class="text-[11px] font-mono text-[var(--text-muted)] uppercase tracking-wider">Package Label Inspection</span>
+                        <span id="low-confidence-tag" class="hidden text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">Low Confidence OCR</span>
+                    </div>
+                    
+                    <div id="imageViewerTrigger" class="relative w-full overflow-hidden rounded-xl border border-[var(--card-border)] bg-black/60 flex items-center justify-center p-1.5 min-h-[180px] max-h-[260px] sm:max-h-[300px] cursor-pointer group" title="Click to view in high resolution lightbox">
+                        <img id="result-image" class="max-h-[240px] sm:max-h-[280px] w-auto object-contain rounded-lg shadow-lg" alt="Scanned Product Label" />
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="px-2.5 py-1 rounded-lg bg-black/80 text-[var(--cyan-glow)] font-mono text-xs flex items-center gap-1.5 border border-[var(--card-border)]">
+                                <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Expand Lightbox
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Attachment Metadata Card (User's Attachment component) -->
+                    <div class="w-full mt-2.5 p-2 rounded-xl border border-[var(--card-border)] bg-[var(--input-bg)] flex items-center justify-between">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <i data-lucide="image" class="w-3.5 h-3.5 text-[var(--cyan-glow)] shrink-0"></i>
+                            <div class="overflow-hidden">
+                                <span id="label-filename" class="text-xs font-semibold text-[var(--text-main)] block truncate">scan_label.jpg</span>
+                                <span class="text-[10px] text-[var(--text-muted)] font-mono">Vision AI + Tesseract OCR</span>
                             </div>
                         </div>
+                        <button type="button" id="openModalBtn" class="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--cyan-glow)] transition" title="Open Full Lightbox">
+                            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+
+                    <div id="product-link-banner" class="hidden w-full mt-2 p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs flex items-center justify-between">
+                        <span class="text-[var(--text-muted)] truncate font-mono text-[11px]" id="product-link-text"></span>
+                        <a id="product-link-anchor" target="_blank" class="text-[var(--cyan-glow)] font-bold shrink-0 ml-2 hover:underline text-xs">Link ↗</a>
+                    </div>
+                </div>
+
+                <!-- Statutory Compliance Score Card -->
+                <div class="glass-panel p-3.5 sm:p-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <h3 class="text-xs font-bold text-[var(--text-main)]">Statutory Compliance Score</h3>
+                            <p class="text-[10px] text-[var(--text-muted)] font-mono" id="rules-summary">17 Rules Verified</p>
+                        </div>
+                        <div id="pass-fail-badge" class="px-2.5 py-0.5 rounded-full font-mono font-bold text-[11px]">PASS</div>
+                    </div>
+
+                    <div class="flex items-center justify-center py-1">
+                        <div class="relative flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" stroke="rgba(255,255,255,0.08)" stroke-width="8" fill="transparent"></circle>
+                                <circle id="score-circle" cx="60" cy="60" r="50" stroke="#34d399" stroke-width="8" fill="transparent" stroke-linecap="round" stroke-dasharray="314.15" stroke-dashoffset="314.15" style="transition: stroke-dashoffset 0.8s ease, stroke 0.4s ease;"></circle>
+                            </svg>
+                            <div class="absolute flex flex-col items-center">
+                                <span id="score-value" class="text-2xl sm:text-3xl font-extrabold font-mono">0</span>
+                                <span class="text-[9px] font-mono text-[var(--text-muted)] uppercase">/ 100 PTS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t border-[var(--divider-color)] text-center">
+                        <div>
+                            <span class="block text-[10px] text-[var(--text-muted)] font-mono">Passed</span>
+                            <span id="stat-passed-count" class="text-sm font-bold text-emerald-400 font-mono">0</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-[var(--text-muted)] font-mono">Missing</span>
+                            <span id="stat-missing-count" class="text-sm font-bold text-rose-400 font-mono">0</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-[var(--text-muted)] font-mono">Non-Format</span>
+                            <span id="stat-format-count" class="text-sm font-bold text-amber-400 font-mono">0</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Extracted Declarations, Tabbed Rule Findings, Checklists & Finalize -->
+            <div class="lg:col-span-7 flex flex-col gap-3.5">
+                
+                <!-- Extracted Fields Editor (Compact & Scrollable) -->
+                <div class="glass-panel p-3.5 sm:p-4 flex flex-col">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <h3 class="text-xs font-bold text-[var(--text-main)]">Extracted Statutory Declarations</h3>
+                            <p class="text-[10px] text-[var(--text-muted)]">Officer can review & adjust values before report generation</p>
+                        </div>
+                    </div>
+
+                    <div id="fields-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[260px] overflow-y-auto pr-1 custom-scrollbar">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Unified Tabbed Rule Findings (Violations vs Compliant) -->
+                <div class="glass-panel p-3.5 sm:p-4 flex flex-col">
+                    
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="btn-group">
+                            <button type="button" id="tabViolationsBtn" class="active">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-400"></i>
+                                <span>Violations (<span id="tabViolationsCount">0</span>)</span>
+                            </button>
+                            <button type="button" id="tabPassedBtn">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span>Compliant (<span id="tabPassedCount">0</span>)</span>
+                            </button>
+                        </div>
+                        <span class="text-[10px] font-mono text-[var(--text-muted)]">LMPC 2011 Rules</span>
+                    </div>
+
+                    <!-- Violations List -->
+                    <div id="violations-container" class="space-y-1.5 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div id="violations-list" class="space-y-1.5"></div>
+                    </div>
+
+                    <!-- Compliant Rules List (Hidden by default) -->
+                    <div id="passed-container" class="hidden space-y-1.5 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div id="passed-list" class="space-y-1.5"></div>
                     </div>
 
                 </div>
-            </div>
 
-            <!-- Two-Column Workspace: Evidence Viewer (Left) & Field Inspector (Right) -->
-            <div class="grid lg:grid-cols-12 gap-6 items-start">
-                
-                <!-- Left: Physical Evidence Label Card -->
-                <div class="lg:col-span-5 space-y-4">
-                    <div class="glass-panel rounded-3xl p-5">
-                        <div class="flex items-center justify-between mb-3">
-                            <h2 class="font-heading font-bold text-sm text-white flex items-center gap-2">
-                                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                Inspected Package Label
-                            </h2>
-                            <span class="text-[10px] font-mono px-2 py-0.5 bg-slate-800 text-slate-400 rounded border border-slate-700">Digital Evidence</span>
-                        </div>
-
-                        <div class="rounded-2xl overflow-hidden bg-black/60 border border-slate-700/60 p-2 flex items-center justify-center min-h-[280px]">
-                            <img id="result-image" class="w-full max-h-[380px] object-contain rounded-xl transition hover:scale-[1.02] duration-300" alt="Scanned commodity label">
-                        </div>
-
-                        <!-- Product Link Banner if scanned from URL -->
-                        <div id="product-link-banner" class="hidden mt-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-2 truncate pr-2">
-                                <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                                <span id="product-link-text" class="text-slate-400 truncate"></span>
+                <!-- Inspector Verification Checklist (User's CheckboxDemo) -->
+                <div class="glass-panel p-3 sm:p-3.5">
+                    <h3 class="text-xs font-bold text-[var(--text-main)] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="check-square" class="w-3.5 h-3.5 text-[var(--cyan-glow)]"></i>
+                        <span>Officer Statutory Checklist</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="chk-physical" class="custom-checkbox" checked />
+                            <div>
+                                <span class="text-xs font-semibold text-[var(--text-main)] block">Physical sample matches</span>
+                                <span class="text-[10px] text-[var(--text-muted)]">Commodity matches label declarations.</span>
                             </div>
-                            <a id="product-link-anchor" href="#" target="_blank" rel="noopener noreferrer" class="shrink-0 text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
-                                Visit Listing ↗
+                        </label>
+                        <label class="checkbox-field">
+                            <input type="checkbox" id="chk-font" class="custom-checkbox" checked />
+                            <div>
+                                <span class="text-xs font-semibold text-[var(--text-main)] block">Table I font height</span>
+                                <span class="text-[10px] text-[var(--text-muted)]">Letter heights satisfy Rule 6(1)(b).</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Finalize & Report Export Card -->
+                <div class="glass-panel p-3.5 sm:p-4">
+                    <h3 class="text-xs font-bold text-[var(--text-main)] mb-2">Finalize Enforcement Report</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2.5">
+                        <div>
+                            <label class="block text-[10px] font-mono text-[var(--text-muted)] mb-0.5">Inspector / Officer Name</label>
+                            <input type="text" id="officer-name" value="Legal Metrology Officer" class="custom-input w-full rounded-lg px-2.5 py-1.5 text-xs font-mono" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-mono text-[var(--text-muted)] mb-0.5">Product Description</label>
+                            <input type="text" id="product-name" value="Packaged Commodity" class="custom-input w-full rounded-lg px-2.5 py-1.5 text-xs font-mono" />
+                        </div>
+                    </div>
+
+                    <button type="button" id="finalize-btn" class="btn-action-primary w-full py-2.5 rounded-xl text-white font-bold text-xs tracking-wider uppercase flex items-center justify-center gap-2">
+                        <span id="fin-loading" class="hidden">Generating PDF & Word Report...</span>
+                        <span id="fin-text">🔒 Finalize Report & Export Formal Audit</span>
+                    </button>
+
+                    <!-- Download Section -->
+                    <div id="download-section" class="hidden mt-3 pt-2.5 border-t border-[var(--divider-color)] flex items-center justify-between flex-wrap gap-2">
+                        <span class="text-xs text-emerald-400 font-mono font-semibold flex items-center gap-1">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                            <span>Audit Finalized & Generated</span>
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <a id="pdf-link" target="_blank" class="px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-mono font-bold hover:bg-rose-500/30 transition flex items-center gap-1">
+                                <i data-lucide="file-text" class="w-3 h-3"></i>
+                                <span>PDF</span>
+                            </a>
+                            <a id="docx-link" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-mono font-bold hover:bg-blue-500/30 transition flex items-center gap-1">
+                                <i data-lucide="file-code" class="w-3 h-3"></i>
+                                <span>Word</span>
                             </a>
                         </div>
                     </div>
-
-                    <!-- Finalize Inspection Action Box -->
-                    <div class="glass-panel rounded-3xl p-5 border border-indigo-500/20">
-                        <div class="flex items-center justify-between mb-3">
-                            <h2 class="font-heading font-bold text-sm text-white">Generate Legal Notice & Report</h2>
-                            <span class="text-[10px] text-slate-400 font-medium">Step 2 / Official Filing</span>
-                        </div>
-
-                        <div class="space-y-3 mb-4">
-                            <div>
-                                <label class="text-[11px] text-slate-400 block mb-1">Inspector / Officer Name</label>
-                                <input type="text" id="officer-name" value="Legal Metrology Officer" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-                            </div>
-                            <div>
-                                <label class="text-[11px] text-slate-400 block mb-1">Product Description / Commodity Name</label>
-                                <input type="text" id="product-name" placeholder="e.g. Parle-G Gluco Biscuits 500g" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
-                            </div>
-                        </div>
-
-                        <button id="finalize-btn" class="gradient-btn w-full py-3 rounded-xl text-white font-heading font-semibold text-xs tracking-wide flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                            <span id="fin-text">Finalize & Generate Metrology Case File</span>
-                            <span id="fin-loading" class="hidden flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Compiling Case File…</span>
-                        </button>
-
-                        <!-- Download Links Area (Revealed upon finalize) -->
-                        <div id="download-section" class="hidden mt-4 pt-4 border-t border-slate-800 space-y-2.5">
-                            <div class="flex items-center gap-2 text-emerald-400 text-xs font-semibold mb-2">
-                                <span>✓ Inspection Case File Successfully Compiled!</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <a id="pdf-link" href="#" target="_blank" class="download-btn bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-xl py-2.5 px-3 text-center text-xs font-semibold flex items-center justify-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    PDF Notice
-                                </a>
-                                <a id="docx-link" href="#" target="_blank" class="download-btn bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl py-2.5 px-3 text-center text-xs font-semibold flex items-center justify-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    DOCX File
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Right: Extracted Declarations & Rule Violations -->
-                <div class="lg:col-span-7 space-y-6">
-                    
-                    <!-- Extracted Fields (Officer Review & Edit) -->
-                    <div class="glass-panel rounded-3xl p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h2 class="font-heading font-bold text-base text-white">Extracted Mandatory Declarations</h2>
-                                <p class="text-xs text-slate-400">Values extracted by Vision AI and OCR. Officers can correct any field before filing.</p>
-                            </div>
-                            <span class="text-[10px] font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-1 rounded">Interactive Editor</span>
-                        </div>
-
-                        <div id="fields-grid" class="grid sm:grid-cols-2 gap-3.5"></div>
-                    </div>
-
-                    <!-- Violations & Infringement Details -->
-                    <div id="violations-section" class="glass-panel rounded-3xl p-6 hidden border-rose-500/20">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-                            <h2 class="font-heading font-bold text-base text-rose-300">Statutory Non-Compliance / Violations</h2>
-                        </div>
-                        <div id="violations-list" class="space-y-2.5"></div>
-                    </div>
-
-                    <!-- Passed Statutory Checks -->
-                    <div id="passed-section" class="glass-panel rounded-3xl p-6 hidden border-emerald-500/20">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                            <h2 class="font-heading font-bold text-base text-emerald-300">Verified Compliant Declarations</h2>
-                        </div>
-                        <div id="passed-list" class="space-y-2"></div>
-                    </div>
-
                 </div>
 
             </div>
 
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="w-full max-w-7xl mx-auto mt-8 text-center text-slate-500 text-xs">
-        <p>LabelSure™ AI Metrology Suite • Department of Consumer Affairs • Government of India Standards</p>
-    </footer>
+        <footer class="py-2.5 text-center text-[10px] font-mono text-[var(--text-muted)]">
+            Legal Metrology (Packaged Commodities) Rules, 2011 Inspection Portal
+        </footer>
+    </div>
+
+    <!-- Image Zoom Modal (Lightbox) -->
+    <div id="imageModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-3" onclick="document.getElementById('imageModal').classList.add('hidden')">
+        <div class="relative max-w-3xl max-h-[90vh] p-1 flex flex-col items-center" onclick="event.stopPropagation()">
+            <div class="w-full flex items-center justify-between mb-2 px-2 text-white font-mono text-xs">
+                <span>Product Label Full-Resolution Inspection</span>
+                <button type="button" onclick="document.getElementById('imageModal').classList.add('hidden')" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <img id="modalImage" class="max-w-full max-h-[80vh] rounded-xl object-contain border border-[var(--card-border)] bg-black/60 shadow-2xl" />
+        </div>
+    </div>
 
     <script>
         const API = window.location.origin;
+        let isLightMode = false;
+
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+
+        themeToggleBtn.addEventListener("click", () => {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle("light-theme", isLightMode);
+            themeToggleIcon.textContent = isLightMode ? "🌙" : "☀️";
+        });
+
+        // Dropdown toggle
+        const moreOptionsBtn = document.getElementById("moreOptionsBtn");
+        const moreOptionsMenu = document.getElementById("moreOptionsMenu");
+        moreOptionsBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            moreOptionsMenu.classList.toggle("hidden");
+        });
+        window.addEventListener("click", () => {
+            moreOptionsMenu.classList.add("hidden");
+        });
+
+        // Logo balance oscillation
+        if (window.anime) {
+            anime({
+                targets: '#scaleLogo',
+                rotate: [-6, 6],
+                duration: 3200,
+                direction: 'alternate',
+                loop: true,
+                easing: 'easeInOutSine'
+            });
+        }
+
+        // Image zoom modal handlers
+        const imageViewerTrigger = document.getElementById("imageViewerTrigger");
+        const openModalBtn = document.getElementById("openModalBtn");
+        const imageModal = document.getElementById("imageModal");
+        const modalImage = document.getElementById("modalImage");
+
+        function openModal() {
+            const src = document.getElementById('result-image').src;
+            if (src && !src.endsWith('#')) {
+                modalImage.src = src;
+                imageModal.classList.remove('hidden');
+            }
+        }
+        imageViewerTrigger.addEventListener('click', openModal);
+        openModalBtn.addEventListener('click', openModal);
+
+        // Tab Switching: Violations vs Compliant
+        const tabViolationsBtn = document.getElementById('tabViolationsBtn');
+        const tabPassedBtn = document.getElementById('tabPassedBtn');
+        const violationsContainer = document.getElementById('violations-container');
+        const passedContainer = document.getElementById('passed-container');
+
+        tabViolationsBtn.addEventListener('click', () => {
+            tabViolationsBtn.classList.add('active');
+            tabPassedBtn.classList.remove('active');
+            violationsContainer.classList.remove('hidden');
+            passedContainer.classList.add('hidden');
+        });
+
+        tabPassedBtn.addEventListener('click', () => {
+            tabPassedBtn.classList.add('active');
+            tabViolationsBtn.classList.remove('active');
+            passedContainer.classList.remove('hidden');
+            violationsContainer.classList.add('hidden');
+        });
+
+        // Background canvas stream
+        (function () {
+            const canvas = document.getElementById("ocr-stream-canvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+            function resize() {
+                width = window.innerWidth; height = window.innerHeight;
+                canvas.width = width * dpr; canvas.height = height * dpr;
+                canvas.style.width = width + "px"; canvas.style.height = height + "px";
+                ctx.scale(dpr, dpr);
+            }
+            window.addEventListener("resize", resize);
+            resize();
+
+            const LABEL_TOKENS = ["RULE 6(1)(a)", "RULE 6(1)(b)", "RULE 6(1)(c)", "RULE 6(1)(d)", "RULE 6(1)(e)", "RULE 6(1)(f)", "RULE 6(1)(g)", "RULE 6(2)"];
+            const TOTAL_NODES = window.innerWidth < 640 ? 14 : 26;
+
+            class LabelScanNode {
+                constructor() { this.init(true); }
+                init(randomY = false) {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : height + Math.random() * 40;
+                    this.text = LABEL_TOKENS[Math.floor(Math.random() * LABEL_TOKENS.length)];
+                    this.type = Math.random() > 0.45 ? "TOKEN" : "RETICLE";
+                    this.alpha = Math.random() * 0.4 + 0.1;
+                    this.fadeSpeed = (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1);
+                    this.vx = (Math.random() - 0.5) * 0.25;
+                    this.vy = -(Math.random() * 0.35 + 0.15);
+                    this.boxSize = Math.random() * 10 + 12;
+                    this.fontSize = 10;
+                }
+                update() {
+                    this.x += this.vx; this.y += this.vy; this.alpha += this.fadeSpeed;
+                    if (this.alpha >= 0.6) { this.alpha = 0.6; this.fadeSpeed = -Math.abs(this.fadeSpeed); }
+                    else if (this.alpha <= 0.08) { this.fadeSpeed = Math.abs(this.fadeSpeed); }
+                    if (this.y < -40 || this.x < -40 || this.x > width + 40) { this.init(false); }
+                }
+                draw() {
+                    const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+                    ctx.save(); ctx.translate(this.x, this.y);
+                    if (this.type === "TOKEN") {
+                        ctx.font = `600 ${this.fontSize}px 'JetBrains Mono', monospace`;
+                        ctx.fillStyle = `rgba(${strokeRgb}, ${this.alpha * 0.8})`;
+                        ctx.fillText(this.text, 0, 0);
+                    } else {
+                        const s = this.boxSize, arm = 3;
+                        ctx.strokeStyle = `rgba(${strokeRgb}, ${this.alpha * 0.7})`; ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(-s, -s + arm); ctx.lineTo(-s, -s); ctx.lineTo(-s + arm, -s);
+                        ctx.moveTo(s - arm, -s); ctx.lineTo(s, -s); ctx.lineTo(s, -s + arm);
+                        ctx.moveTo(-s, s - arm); ctx.lineTo(-s, s); ctx.lineTo(-s + arm, s);
+                        ctx.moveTo(s - arm, s); ctx.lineTo(s, s); ctx.lineTo(s, s - arm);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+            }
+
+            const nodes = Array.from({ length: TOTAL_NODES }, () => new LabelScanNode());
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                for (let i = 0; i < nodes.length; i++) { nodes[i].update(); nodes[i].draw(); }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+
         let scanData = null;
 
         const FIELD_CONFIG = {
             mrp: { label: 'Maximum Retail Price (MRP)', rule: 'Rule 6(1)(d)', placeholder: 'e.g. Rs. 120.00' },
             net_quantity: { label: 'Net Quantity', rule: 'Rule 6(1)(b)', placeholder: 'e.g. 500g or 1 L' },
-            unit: { label: 'Standard Measurement Unit', rule: 'Rule 6(1)(b) Table I', placeholder: 'e.g. g, kg, ml, L' },
-            manufacturer_name: { label: 'Manufacturer / Packer Name', rule: 'Rule 6(1)(a)', placeholder: 'Company or Brand name' },
-            manufacturer_address: { label: 'Complete Physical Address', rule: 'Rule 6(1)(a)', placeholder: 'Full address with PIN / Country' },
-            country_of_origin: { label: 'Country of Origin', rule: 'Rule 6(1)(f)', placeholder: 'e.g. India or USA' },
-            consumer_care: { label: 'Consumer Care Contacts', rule: 'Rule 6(1)(e)', placeholder: 'Phone, Email or Helpline' },
-            manufacture_date: { label: 'Month & Year of Mfg/Import', rule: 'Rule 6(1)(c)', placeholder: 'e.g. 08/2024' },
-            best_before_expiry: { label: 'Best Before / Expiry Period', rule: 'Rule 6(1)(g)', placeholder: 'e.g. 12 months from Mfg' },
-            batch_no: { label: 'Batch / Lot / Code Number', rule: 'Rule 6(2)', placeholder: 'e.g. B2024-0891' },
+            unit: { label: 'Standard Unit', rule: 'Rule 6(1)(b) Table I', placeholder: 'e.g. g, kg, ml, L' },
+            manufacturer_name: { label: 'Manufacturer / Packer', rule: 'Rule 6(1)(a)', placeholder: 'Company name' },
+            manufacturer_address: { label: 'Complete Address', rule: 'Rule 6(1)(a)', placeholder: 'Full address with PIN' },
+            country_of_origin: { label: 'Country of Origin', rule: 'Rule 6(1)(f)', placeholder: 'e.g. India' },
+            consumer_care: { label: 'Consumer Care Contacts', rule: 'Rule 6(1)(e)', placeholder: 'Phone / Email' },
+            manufacture_date: { label: 'Mfg / Import Date', rule: 'Rule 6(1)(c)', placeholder: 'e.g. 08/2024' },
+            best_before_expiry: { label: 'Best Before Period', rule: 'Rule 6(1)(g)', placeholder: 'e.g. 12 months' },
+            batch_no: { label: 'Batch / Lot Number', rule: 'Rule 6(2)', placeholder: 'e.g. B2024-0891' },
         };
 
         function init() {
@@ -332,24 +665,21 @@
         }
 
         function renderResults() {
-            // Scan ID Chip
-            document.getElementById('scan-id-text').textContent = scanData.scan_id || 'DEMO-001';
+            const scanId = scanData.scan_id || 'DEMO-001';
+            document.getElementById('scan-id-badge').textContent = scanId;
+            
+            const imageSrc = scanData.image_url.startsWith('http') ? scanData.image_url : (API + scanData.image_url);
+            document.getElementById('result-image').src = imageSrc;
+            document.getElementById('label-filename').textContent = `scan_${scanId}.jpg`;
 
-            // Scanned Image
-            document.getElementById('result-image').src = API + scanData.image_url;
-
-            // Product Name & Title
             if (scanData.product_name) {
-                document.getElementById('product-title-header').textContent = scanData.product_name;
                 document.getElementById('product-name').value = scanData.product_name;
             }
 
-            // Low Confidence Warning
             if (scanData.low_confidence) {
                 document.getElementById('low-confidence-tag').classList.remove('hidden');
             }
 
-            // Product Link
             if (scanData.product_link && scanData.product_link.trim()) {
                 const banner = document.getElementById('product-link-banner');
                 banner.classList.remove('hidden');
@@ -357,15 +687,14 @@
                 document.getElementById('product-link-anchor').href = scanData.product_link;
             }
 
-            // Score Ring & Badge
             const score = scanData.score || 0;
             const circle = document.getElementById('score-circle');
             const circumference = 2 * Math.PI * 50;
             const offset = circumference - (score / 100) * circumference;
 
-            let color = '#4ade80';
-            if (score < 50) color = '#f87171';
-            else if (score < 70) color = '#fbbf24';
+            let color = '#34d399';
+            if (score < 50) color = '#f43f5e';
+            else if (score < 70) color = '#f59e0b';
 
             setTimeout(() => {
                 circle.style.stroke = color;
@@ -376,23 +705,25 @@
 
             const badge = document.getElementById('pass-fail-badge');
             if (scanData.pass_fail === 'PASS') {
-                badge.className = 'px-4 py-1.5 rounded-full font-heading font-bold text-xs tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-                badge.textContent = '✓ LMPC COMPLIANT';
+                badge.className = 'px-2.5 py-0.5 rounded-full font-mono font-bold text-[11px] uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                badge.textContent = '✓ COMPLIANT';
             } else {
-                badge.className = 'px-4 py-1.5 rounded-full font-heading font-bold text-xs tracking-wider uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30';
+                badge.className = 'px-2.5 py-0.5 rounded-full font-mono font-bold text-[11px] uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30';
                 badge.textContent = '✗ NON-COMPLIANT';
             }
 
             const passedCount = scanData.passed_rules ? scanData.passed_rules.length : 0;
             const missingCount = scanData.violations ? scanData.violations.filter(v => v.reason && (v.reason.includes('missing') || v.reason.includes('empty'))).length : 0;
             const formatCount = scanData.violations ? (scanData.violations.length - missingCount) : 0;
+            const totalViolations = (scanData.violations || []).length;
 
             document.getElementById('stat-passed-count').textContent = passedCount;
             document.getElementById('stat-missing-count').textContent = missingCount;
             document.getElementById('stat-format-count').textContent = formatCount;
-            document.getElementById('rules-summary').textContent = `${passedCount} statutory rules verified • ${missingCount + formatCount} infringements`;
+            document.getElementById('rules-summary').textContent = `${passedCount} rules passed • ${totalViolations} violations`;
+            document.getElementById('tabViolationsCount').textContent = totalViolations;
+            document.getElementById('tabPassedCount').textContent = passedCount;
 
-            // Render Extracted Fields
             const fieldsGrid = document.getElementById('fields-grid');
             fieldsGrid.innerHTML = '';
 
@@ -401,71 +732,74 @@
                 const item = fields[key] || {};
                 const value = typeof item === 'object' && item !== null ? (item.value || '') : (item || '');
                 const source = (typeof item === 'object' && item !== null ? item.source : 'none') || 'none';
-                const needsReview = typeof item === 'object' && item !== null ? item.needs_review : false;
 
                 let pillClass = 'source-pill-none';
                 let pillText = 'Missing';
-                if (source === 'both') { pillClass = 'source-pill-both'; pillText = 'Verified (Vision+OCR)'; }
-                else if (source === 'groq') { pillClass = 'source-pill-groq'; pillText = 'Vision AI'; }
-                else if (source === 'ocr') { pillClass = 'source-pill-ocr'; pillText = 'OCR Text'; }
+                if (source === 'both') { pillClass = 'source-pill-both'; pillText = 'AI+OCR'; }
+                else if (source === 'groq') { pillClass = 'source-pill-groq'; pillText = 'Vision'; }
+                else if (source === 'ocr') { pillClass = 'source-pill-ocr'; pillText = 'OCR'; }
 
                 const el = document.createElement('div');
-                el.className = 'field-card glass-subtle rounded-2xl p-3.5 flex flex-col justify-between';
+                el.className = 'field-card glass-subtle rounded-xl p-2 flex flex-col justify-between';
                 el.innerHTML = `
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-[11px] font-semibold text-slate-300">${cfg.label}</span>
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-semibold font-mono ${pillClass}">${pillText}</span>
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[10px] font-semibold text-[var(--text-main)] truncate">${cfg.label}</span>
+                        <span class="px-1.5 py-0.2 rounded text-[8px] font-semibold font-mono ${pillClass}">${pillText}</span>
                     </div>
                     <input type="text" data-field="${key}" value="${escapeHtml(value)}" placeholder="${cfg.placeholder}"
-                        class="w-full bg-slate-900/60 border border-slate-700/60 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono">
-                    <span class="text-[10px] text-slate-500 mt-1.5">${cfg.rule}</span>
+                        class="custom-input w-full rounded-lg px-2 py-1 text-xs font-mono">
+                    <span class="text-[9px] text-[var(--text-muted)] mt-0.5">${cfg.rule}</span>
                 `;
                 fieldsGrid.appendChild(el);
             }
 
-            // Render Violations
+            // Populate Violations
             const violationsList = document.getElementById('violations-list');
             violationsList.innerHTML = '';
             const violations = scanData.violations || [];
 
             if (violations.length > 0) {
-                document.getElementById('violations-section').classList.remove('hidden');
                 for (const v of violations) {
                     const vel = document.createElement('div');
-                    vel.className = 'p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs flex items-start gap-2.5';
+                    vel.className = 'p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs flex items-start gap-2';
                     vel.innerHTML = `
-                        <div class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono text-[10px] font-bold shrink-0 mt-0.5">${v.rule_number || 'Rule 6'}</div>
-                        <div class="flex-1">
-                            <span class="text-rose-200 font-semibold block mb-0.5">${v.field ? v.field.replace('_', ' ').toUpperCase() : 'MANDATORY FIELD'}</span>
-                            <p class="text-rose-300/80">${escapeHtml(v.reason || v.rule_text)}</p>
+                        <div class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-mono text-[9px] font-bold shrink-0 mt-0.5">${v.rule_number || 'Rule 6'}</div>
+                        <div class="flex-1 overflow-hidden">
+                            <span class="text-rose-400 font-semibold block text-[11px]">${v.field ? v.field.replace('_', ' ').toUpperCase() : 'MANDATORY FIELD'}</span>
+                            <p class="text-rose-300 text-[10px] leading-tight">${escapeHtml(v.reason || v.rule_text)}</p>
                         </div>
                     `;
                     violationsList.appendChild(vel);
                 }
             } else {
-                document.getElementById('violations-section').classList.add('hidden');
+                violationsList.innerHTML = '<div class="p-3 text-center text-xs text-emerald-400 font-mono">✓ Zero Statutory Infringements Detected</div>';
             }
 
-            // Render Passed Checks
+            // Populate Passed
             const passedList = document.getElementById('passed-list');
             passedList.innerHTML = '';
             const passed = scanData.passed_rules || [];
 
             if (passed.length > 0) {
-                document.getElementById('passed-section').classList.remove('hidden');
                 for (const p of passed) {
                     const pel = document.createElement('div');
-                    pel.className = 'p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between';
+                    pel.className = 'p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs flex items-center justify-between gap-2';
                     pel.innerHTML = `
-                        <div class="flex items-center gap-2">
-                            <span class="text-emerald-400 font-bold">✓</span>
-                            <span class="font-mono text-[10px] text-emerald-300 px-1.5 py-0.5 rounded bg-emerald-500/20 font-semibold">${p.rule_number}</span>
-                            <span class="text-slate-300 text-[11px]">${escapeHtml(p.field || '')}</span>
+                        <div class="flex items-center gap-1.5 overflow-hidden">
+                            <span class="text-emerald-400 font-bold text-xs">✓</span>
+                            <span class="font-mono text-[9px] text-emerald-400 px-1 py-0.2 rounded bg-emerald-500/20 font-semibold shrink-0">${p.rule_number}</span>
+                            <span class="text-[var(--text-main)] text-[10px] truncate">${escapeHtml(p.field || '')}</span>
                         </div>
-                        <span class="text-[10px] text-slate-400 truncate max-w-xs">${escapeHtml(p.reason || 'Compliant')}</span>
+                        <span class="text-[9px] text-[var(--text-muted)] truncate max-w-[140px] shrink-0">${escapeHtml(p.reason || 'Compliant')}</span>
                     `;
                     passedList.appendChild(pel);
                 }
+            } else {
+                passedList.innerHTML = '<div class="p-3 text-center text-xs text-rose-400 font-mono">No compliant rules recorded</div>';
+            }
+
+            if (window.lucide) {
+                lucide.createIcons();
             }
         }
 
@@ -475,7 +809,6 @@
             return div.innerHTML;
         }
 
-        // Finalize Button & Report Generator
         document.getElementById('finalize-btn').addEventListener('click', async () => {
             const btn = document.getElementById('finalize-btn');
             btn.disabled = true;
@@ -512,12 +845,10 @@
                     return;
                 }
 
-                // Update download links
                 document.getElementById('pdf-link').href = result.pdf_url;
                 document.getElementById('docx-link').href = result.docx_url;
                 document.getElementById('download-section').classList.remove('hidden');
 
-                // Update score and pass_fail
                 scanData.score = result.score;
                 scanData.pass_fail = result.pass_fail;
                 scanData.violations = result.violations;
@@ -535,6 +866,9 @@
         });
 
         init();
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     </script>
 </body>
 </html>
