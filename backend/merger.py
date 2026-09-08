@@ -7,14 +7,31 @@ logger = logging.getLogger(__name__)
 
 # Fields that Groq extracts and we reconcile against OCR
 RECONCILE_FIELDS = [
-    "mrp", "net_quantity", "unit", "manufacturer_name", "manufacturer_address",
+    "mrp", "unit_sale_price", "net_quantity", "unit", "manufacturer_name", "manufacturer_address",
     "country_of_origin", "consumer_care", "manufacture_date",
     "best_before_expiry", "batch_no",
 ]
 
 # High-stakes fields where hallucination is dangerous — reject Groq-only values
 # that cannot be corroborated by ANY OCR evidence
-STRICT_VERIFY_FIELDS = {"mrp", "net_quantity", "unit", "batch_no", "manufacture_date", "best_before_expiry"}
+STRICT_VERIFY_FIELDS = {"mrp", "unit_sale_price", "net_quantity", "unit", "batch_no", "manufacture_date", "best_before_expiry"}
+
+
+def _clean_price_and_usp(val: str | None) -> tuple[str | None, str | None]:
+    """Separate MRP and bundled unit sale price like '₹99.00 (₹0.55/g)'."""
+    if not val:
+        return None, None
+    s = str(val).strip()
+    usp = None
+    # Pattern for (₹0.55/g), (Rs. 0.55/g), ₹0.55/g, Rs. 0.55 per g
+    usp_m = re.search(r"[\(\[\{]?(?:rs\.?|₹|inr)?\s*(\d+(?:\.\d+)?)\s*(?:/|per)\s*(g|kg|ml|l|cl|mg|unit|piece|item)[\)\]\}]?", s, re.I)
+    if usp_m:
+        usp = f"Rs. {usp_m.group(1)}/{usp_m.group(2)}"
+        s = s.replace(usp_m.group(0), "").strip("()[]{} -/")
+
+    num_m = re.search(r"(?:rs\.?|₹|inr)?\s*(\d+(?:\.\d{1,2})?)", s, re.I)
+    mrp = f"Rs. {num_m.group(1)}" if num_m else s
+    return mrp, usp
 
 
 def _normalize(val: str | None) -> str:
@@ -71,16 +88,20 @@ def extract_fields_from_ocr_text(ocr_text: str) -> dict:
 
     text = ocr_text
 
-    # 1. MRP (strict word boundaries to avoid matching words like 'sugars 9g')
+    # 1. MRP & Unit Sale Price
     mrp_match = re.search(
         r"\b(?:mrp|m\.r\.p|retail\s*price|max\s*retail\s*price)\b\s*[:.\-]?\s*(?:rs\.?|₹|inr)?\s*(\d+(?:\.\d{1,2})?)",
         text,
         re.I,
     )
     if not mrp_match:
-        mrp_match = re.search(r"\b(?:rs\.?|₹|inr)\b\s*[:.\-]?\s*(\d+(?:\.\d{1,2})?)", text, re.I)
+        mrp_match = re.search(r"(?:rs\.?|₹|inr)\s*(\d+(?:\.\d{1,2})?)", text, re.I)
     if mrp_match:
         extracted["mrp"] = f"Rs. {mrp_match.group(1)}"
+
+    usp_match = re.search(r"[\(\[\{]?(?:rs\.?|₹|inr)?\s*(\d+(?:\.\d+)?)\s*(?:/|per)\s*(g|kg|ml|l|cl|mg|unit|piece|item)[\)\]\}]?", text, re.I)
+    if usp_match:
+        extracted["unit_sale_price"] = f"Rs. {usp_match.group(1)}/{usp_match.group(2)}"
 
     # 2. Net Quantity and Unit
     # Check for net quantity prefix first: e.g. "Net Qty: 500g", "Net Contents: 946 mL"
@@ -112,7 +133,6 @@ def extract_fields_from_ocr_text(ocr_text: str) -> dict:
             re.I,
         )
 
-
     if net_match:
         qty_val = net_match.group(1)
         raw_unit = net_match.group(2).strip()
@@ -140,24 +160,40 @@ def extract_fields_from_ocr_text(ocr_text: str) -> dict:
         cand = batch_match.group(1).strip()
         if cand.lower() not in ["no", "no.", "number", "num", "na", "nil", "mrp"]:
             extracted["batch_no"] = cand
+    if not extracted.get("batch_no"):
+        # Match alphanumeric codes like HM20826
+        code_match = re.search(r"\b([A-Z]{1,3}\d{4,8}(?:/[0-9:]+)?)\b", text)
+        if code_match:
+            extracted["batch_no"] = code_match.group(1).split("/")[0]
 
-    # 4. Manufacture Date
-    mfg_match = re.search(
-        r"(?:mfg|mfd|manufactur(?:ed|ing)?|pkd|packed|pkg)\s*(?:date)?\s*[:.\-]?\s*([0-9]{1,2}[/\-.][0-9]{2,4}|[0-9]{4}[/\-.][0-9]{1,2}|[a-zA-Z]{3,9}\s*['\.']?\s*[0-9]{2,4}|[0-9]{1,2}\s+[a-zA-Z]{3,9}\s+[0-9]{2,4})",
+    # 4. Manufacture Date & Best Before
+    # Dual slash dates: DATE1 / DATE2 (e.g. "27.07.26 / 21.08.27")
+    dual_date = re.search(
+        r"\b(\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4})\s*[/|]\s*(\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4})\b",
         text,
-        re.I,
     )
-    if mfg_match:
-        extracted["manufacture_date"] = mfg_match.group(1).strip()
+    if dual_date:
+        extracted["manufacture_date"] = dual_date.group(1).strip()
+        extracted["best_before_expiry"] = dual_date.group(2).strip()
+
+    if not extracted.get("manufacture_date"):
+        mfg_match = re.search(
+            r"(?:mfg|mfd|manufactur(?:ed|ing)?|pkd|packed|pkg)\s*(?:date)?\s*[:.\-]?\s*([0-9]{1,2}[/\-.][0-9]{2,4}|[0-9]{4}[/\-.][0-9]{1,2}|[a-zA-Z]{3,9}\s*['\.']?\s*[0-9]{2,4}|[0-9]{1,2}\s+[a-zA-Z]{3,9}\s+[0-9]{2,4})",
+            text,
+            re.I,
+        )
+        if mfg_match:
+            extracted["manufacture_date"] = mfg_match.group(1).strip()
 
     # 5. Best Before / Expiry
-    exp_match = re.search(
-        r"(?:best\s*before|use\s*by|exp(?:iry)?\s*(?:date)?|exp\.?\s*date)\s*[:.\-]?\s*([0-9]{1,2}[/\-.][0-9]{2,4}|[0-9]{4}[/\-.][0-9]{1,2}|[0-9]+\s*(?:months?|days?|years?)\s*(?:from\s*(?:mfg|pkd|packaging))?|[a-zA-Z]{3,9}\s*[0-9]{2,4})",
-        text,
-        re.I,
-    )
-    if exp_match:
-        extracted["best_before_expiry"] = exp_match.group(1).strip()
+    if not extracted.get("best_before_expiry"):
+        exp_match = re.search(
+            r"(?:best\s*before|use\s*by|exp(?:iry)?\s*(?:date)?|exp\.?\s*date)\s*[:.\-]?\s*([0-9]{1,2}[/\-.][0-9]{2,4}|[0-9]{4}[/\-.][0-9]{1,2}|[0-9]+\s*(?:months?|days?|years?)\s*(?:from\s*(?:mfg|pkd|packaging))?|[a-zA-Z]{3,9}\s*[0-9]{2,4})",
+            text,
+            re.I,
+        )
+        if exp_match:
+            extracted["best_before_expiry"] = exp_match.group(1).strip()
 
     # 6. Consumer Care
     consumer_parts = []
@@ -266,6 +302,13 @@ def merge_results(groq_result: dict | None, ocr_result: dict) -> dict:
     ocr_empty = len(ocr_text.strip()) < 30
 
     merged = {}
+
+    # Decouple bundled USP from MRP (e.g. '₹99.00 (₹0.55/g)' -> mrp='Rs. 99.00', usp='Rs. 0.55/g')
+    if groq_result and groq_result.get("mrp"):
+        clean_mrp, detected_usp = _clean_price_and_usp(groq_result.get("mrp"))
+        groq_result["mrp"] = clean_mrp
+        if detected_usp and not groq_result.get("unit_sale_price"):
+            groq_result["unit_sale_price"] = detected_usp
 
     for field in RECONCILE_FIELDS:
         groq_val = groq_result.get(field) if groq_result else None

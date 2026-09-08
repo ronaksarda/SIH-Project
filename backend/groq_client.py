@@ -20,29 +20,94 @@ CRITICAL RULES — VIOLATION IS UNACCEPTABLE:
 2. If a field is NOT PHYSICALLY PRINTED on the label, you MUST return null for that field.
 3. Do NOT use product knowledge or training data to fill in missing information.
 4. If text is blurry or partially occluded and you cannot read it with confidence, return null.
-5. For MRP: ONLY report a price if you see "MRP", "M.R.P", "Rs.", "₹", or "INR" followed by a number on the label. If there is no price printed, return null. Do NOT invent prices.
-6. For net_quantity: ONLY report if you see a weight/volume/count printed (e.g. "500g", "1L"). Do NOT guess from product type.
-7. For dates: ONLY report dates you can read on the label. Do NOT make up dates.
-8. For batch_no: ONLY report if you see "Batch", "Lot", "B.No" followed by a code. Do NOT fabricate codes.
+5. For MRP: Report the package price ONLY (e.g. '₹99.00', 'Rs. 99.00', '₹45'). Do NOT bundle per-unit rate or per-gram rate into mrp. If there is no price printed, return null.
+6. For unit_sale_price: If there is a per-unit/per-gram rate printed (e.g. '₹0.55/g', 'Rs. 1.20/ml', '₹10/100g'), report it separately in unit_sale_price.
+7. For net_quantity: Report weight/volume/count as printed (e.g. '180g', '500g', '1L').
+8. For dates: When dual dates are printed (e.g. '27.07.26 / 21.08.27'), the first is manufacture_date and the second is best_before_expiry.
+9. For batch_no: Report the batch/lot code (e.g. 'HM20826'). Do NOT fabricate.
 
 Return ONLY valid JSON — no markdown, no explanation, no backticks.
 
 Required JSON schema:
 {
-  "mrp": "string or null — Maximum Retail Price EXACTLY as printed (e.g. '₹120.00', 'Rs. 45'). null if not visible.",
-  "net_quantity": "string or null — net weight/volume/count EXACTLY as printed (e.g. '500g', '1L', '10 pieces'). null if not visible.",
-  "unit": "string or null — standard unit from net_quantity (e.g. 'g', 'kg', 'ml', 'L', 'pieces'). null if net_quantity is null.",
-  "manufacturer_name": "string or null — manufacturer/packer/importer company name as printed. null if not visible.",
-  "manufacturer_address": "string or null — full address as printed. null if not visible.",
-  "country_of_origin": "string or null — country of origin ONLY if explicitly printed (e.g. 'India', 'Made in China'). null if not stated.",
-  "consumer_care": "string or null — customer care contact as printed (phone/email/address). null if not visible.",
-  "manufacture_date": "string or null — manufacture/packing date EXACTLY as printed. null if not visible.",
-  "best_before_expiry": "string or null — expiry/best-before EXACTLY as printed. null if not visible.",
-  "batch_no": "string or null — batch/lot number EXACTLY as printed. null if not visible.",
-  "raw_text_blocks": ["array of key text blocks from the label relating to price, quantity, dates, batch, manufacturer, contact"]
+  "mrp": "string or null — Package Maximum Retail Price ONLY (e.g. '₹99.00', 'Rs. 99.00'). null if not visible.",
+  "unit_sale_price": "string or null — Unit sale price if printed (e.g. '₹0.55/g', 'Rs. 0.55/g'). null if not visible.",
+  "net_quantity": "string or null — Net weight/volume/count as printed (e.g. '180g', '500g', '1L'). null if not visible.",
+  "unit": "string or null — Standard unit from net_quantity (e.g. 'g', 'kg', 'ml', 'L'). null if net_quantity is null.",
+  "manufacturer_name": "string or null — Manufacturer/packer/importer company name as printed. null if not visible.",
+  "manufacturer_address": "string or null — Complete address as printed. null if not visible.",
+  "country_of_origin": "string or null — Country of origin ONLY if explicitly printed (e.g. 'India'). null if not stated.",
+  "consumer_care": "string or null — Customer care contact details (phone/email/address/URL). null if not visible.",
+  "manufacture_date": "string or null — Manufacture or packaging date as printed. null if not visible.",
+  "best_before_expiry": "string or null — Best before or expiry date as printed. null if not visible.",
+  "batch_no": "string or null — Batch or lot number as printed. null if not visible.",
+  "raw_text_blocks": ["up to 12 key printed statutory lines verbatim from the label (e.g. Net Qty, Mfd by, Ingredients, Nutrition)"]
 }
 
 Return ONLY the JSON object, nothing else."""
+
+
+def _recover_json(raw: str) -> dict | None:
+    """Attempt robust parsing or repair of partially truncated JSON from LLM."""
+    if not raw:
+        return None
+    # 1. Direct parse
+    try:
+        return json.loads(raw)
+    except Exception:
+        pass
+
+    # 2. Markdown code block
+    if "```" in raw:
+        for part in raw.split("```")[1:]:
+            cand = part.strip()
+            if cand.lower().startswith("json"):
+                cand = cand[4:].strip()
+            try:
+                return json.loads(cand)
+            except Exception:
+                pass
+
+    # 3. Substring between outermost { and }
+    start = raw.find("{")
+    if start != -1:
+        end = raw.rfind("}")
+        if end > start:
+            try:
+                return json.loads(raw[start:end + 1])
+            except Exception:
+                pass
+
+        # 4. Truncated completion: close open string and append braces
+        chunk = raw[start:].strip()
+        # If open quote, close it
+        in_str = False
+        escape = False
+        for ch in chunk:
+            if ch == "\\" and not escape:
+                escape = True
+                continue
+            if ch == '"' and not escape:
+                in_str = not in_str
+            escape = False
+        if in_str:
+            chunk += '"'
+
+        for suffix in ["}", "]}", "\"]}", "}"]:
+            try:
+                return json.loads(chunk + suffix)
+            except Exception:
+                pass
+
+        # Truncate at last comma and close object
+        last_comma = chunk.rfind(",")
+        if last_comma != -1:
+            try:
+                return json.loads(chunk[:last_comma] + "}")
+            except Exception:
+                pass
+
+    return None
 
 
 async def extract_fields(image_path: str) -> dict | None:
@@ -81,37 +146,11 @@ async def extract_fields(image_path: str) -> dict | None:
                     }
                 ],
                 temperature=0.1,
-                max_tokens=800,
+                max_tokens=2048,
             )
 
             raw = response.choices[0].message.content.strip()
-
-            parsed = None
-            try:
-                parsed = json.loads(raw)
-            except Exception:
-                pass
-
-            if not parsed and "```" in raw:
-                parts = raw.split("```")
-                for p in parts[1:]:
-                    cand = p.strip()
-                    if cand.lower().startswith("json"):
-                        cand = cand[4:].strip()
-                    try:
-                        parsed = json.loads(cand)
-                        break
-                    except Exception:
-                        continue
-
-            if not parsed:
-                start = raw.find("{")
-                end = raw.rfind("}")
-                if start != -1 and end > start:
-                    try:
-                        parsed = json.loads(raw[start:end + 1])
-                    except Exception:
-                        pass
+            parsed = _recover_json(raw)
 
             if parsed and isinstance(parsed, dict):
                 logger.info("Groq extraction succeeded (attempt=%d)", attempt + 1)

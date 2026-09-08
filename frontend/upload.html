@@ -8,25 +8,70 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #07090e;
+            --card-bg: rgba(15, 23, 42, 0.65);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --emerald-glow: #10b981;
+            --cyan-glow: #06b6d4;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
         * { font-family: 'Inter', sans-serif; }
         h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
         body {
-            background-color: #070913;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glows & Sparkle Canvas */
+        .bg-canvas-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glows {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle 700px at 15% 15%, rgba(16, 185, 129, 0.14), transparent 70%),
+                radial-gradient(circle 800px at 85% 20%, rgba(6, 182, 212, 0.12), transparent 70%),
+                radial-gradient(circle 600px at 50% 90%, rgba(16, 185, 129, 0.08), transparent 75%);
+            filter: blur(40px);
+        }
+
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            background-size: 44px 44px;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
+                linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+        }
+
+        #sparkle-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
         }
 
         .glass-panel {
-            background: rgba(15, 23, 42, 0.65);
+            background: var(--card-bg);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .glass-subtle {
@@ -35,27 +80,27 @@
         }
 
         .neon-border-indigo {
-            box-shadow: 0 0 30px -5px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25), 0 0 20px -5px rgba(6, 182, 212, 0.2);
         }
 
         .upload-dropzone {
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .upload-dropzone:hover, .upload-dropzone.dragover {
-            border-color: #818cf8;
-            background: rgba(99, 102, 241, 0.08);
+            border-color: var(--emerald-glow);
+            background: rgba(16, 185, 129, 0.06);
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3);
         }
 
         .gradient-btn {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
-            box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.5);
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #06b6d4 100%);
+            box-shadow: 0 4px 25px -2px rgba(16, 185, 129, 0.45);
             transition: all 0.25s ease;
         }
         .gradient-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 30px 0 rgba(99, 102, 241, 0.65);
+            box-shadow: 0 8px 35px 0 rgba(16, 185, 129, 0.6);
             filter: brightness(1.1);
         }
         .gradient-btn:active:not(:disabled) {
@@ -77,13 +122,13 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, #c084fc, transparent);
-            box-shadow: 0 0 15px 4px rgba(56, 189, 248, 0.7);
+            background: linear-gradient(90deg, transparent, #10b981 30%, #38bdf8 70%, transparent);
+            box-shadow: 0 0 16px 3px rgba(16, 185, 129, 0.85);
             animation: scanLaser 1.8s ease-in-out infinite alternate;
         }
         @keyframes scanLaser {
-            0% { top: 0%; opacity: 0.8; }
-            100% { top: 98%; opacity: 1; }
+            0% { top: 2%; opacity: 0.8; }
+            100% { top: 96%; opacity: 1; }
         }
 
         .pulse-dot {
@@ -99,15 +144,23 @@
         }
         .chip-btn:hover {
             transform: translateY(-1px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #fff;
         }
     </style>
 </head>
-<body class="min-h-screen text-slate-100 flex flex-col justify-between p-4 md:p-6 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+<body class="min-h-screen text-slate-100 flex flex-col justify-between p-4 md:p-6 antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+
+    <!-- Dynamic Starfield & Glow Canvas -->
+    <div class="bg-canvas-container">
+        <div class="ambient-glows"></div>
+        <div class="grid-lines"></div>
+        <canvas id="sparkle-canvas"></canvas>
+    </div>
 
     <!-- Top Navigation Bar -->
-    <header class="w-full max-w-5xl mx-auto mb-6">
+    <header class="w-full max-w-5xl mx-auto mb-6 relative z-10">
         <div class="glass-panel rounded-2xl px-5 py-3.5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 p-[1px] shadow-lg shadow-indigo-500/20">
@@ -178,6 +231,12 @@
                     </button>
                     <button type="button" id="demo-imported" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
                         <span class="text-amber-400 text-sm">⚠</span> Imported US Soup (No INR MRP)
+                    </button>
+                    <button type="button" id="demo-cereal" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
+                        <span class="text-cyan-400 text-sm">🥣</span> Try Cereal Label
+                    </button>
+                    <button type="button" id="demo-snack" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
+                        <span class="text-emerald-400 text-sm">🍫</span> Try Energy Bar
                     </button>
                 </div>
             </div>
@@ -372,6 +431,127 @@
                 showError('Could not load demo sample. Please upload manually.');
             }
         });
+
+        document.getElementById('demo-cereal').addEventListener('click', async () => {
+            hideError();
+            try {
+                const res = await fetch('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80');
+                const blob = await res.blob();
+                const file = new File([blob], 'sample_cereal_nutrition.jpg', { type: 'image/jpeg' });
+                handleFile(file);
+            } catch {
+                showError('Could not load online sample. Please upload manually.');
+            }
+        });
+
+        document.getElementById('demo-snack').addEventListener('click', async () => {
+            hideError();
+            try {
+                const res = await fetch('https://images.unsplash.com/photo-1621996346565-e3d5d6281691?w=800&q=80');
+                const blob = await res.blob();
+                const file = new File([blob], 'sample_energy_bar.jpg', { type: 'image/jpeg' });
+                handleFile(file);
+            } catch {
+                showError('Could not load online sample. Please upload manually.');
+            }
+        });
+
+        /* ====================================================
+           STARFIELD & 4-POINT DIAMOND SPARKLE ENGINE
+           ==================================================== */
+        (function () {
+            const canvas = document.getElementById('sparkle-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                ctx.scale(dpr, dpr);
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const PALETTE = [
+                'rgba(255, 255, 255,',
+                'rgba(52, 211, 153,', // Emerald
+                'rgba(6, 182, 212,',  // Cyan
+                'rgba(251, 191, 36,'  // Warm Amber
+            ];
+
+            class Sparkle {
+                constructor() { this.init(true); }
+
+                init(randomY = false) {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : height + 15;
+                    this.size = Math.random() * 2 + 0.6;
+                    this.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+                    this.alpha = Math.random() * 0.8;
+                    this.fadeSpeed = (Math.random() * 0.012 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
+                    this.vx = (Math.random() - 0.5) * 0.3;
+                    this.vy = -(Math.random() * 0.35 + 0.12);
+                    this.isDiamond = Math.random() < 0.35;
+                    this.spike = this.size * (Math.random() * 2.5 + 2.5);
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha += this.fadeSpeed;
+
+                    if (this.alpha >= 1) {
+                        this.alpha = 1;
+                        this.fadeSpeed = -Math.abs(this.fadeSpeed);
+                    } else if (this.alpha <= 0.05) {
+                        this.fadeSpeed = Math.abs(this.fadeSpeed);
+                    }
+
+                    if (this.y < -30 || this.x < -30 || this.x > width + 30) this.init(false);
+                }
+
+                draw() {
+                    const a = Math.max(0, Math.min(1, this.alpha));
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `${this.color} ${a})`;
+                    ctx.shadowColor = `${this.color} 0.9)`;
+                    ctx.shadowBlur = this.size * 5;
+                    ctx.fill();
+
+                    if (this.isDiamond && a > 0.3) {
+                        const sp = this.spike * a;
+                        const th = Math.max(0.6, this.size * 0.35);
+                        ctx.fillStyle = `${this.color} ${a * 0.95})`;
+
+                        ctx.beginPath();
+                        ctx.moveTo(0, -sp); ctx.lineTo(th, 0); ctx.lineTo(0, sp); ctx.lineTo(-th, 0);
+                        ctx.closePath(); ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.moveTo(-sp, 0); ctx.lineTo(0, th); ctx.lineTo(sp, 0); ctx.lineTo(0, -th);
+                        ctx.closePath(); ctx.fill();
+                    }
+                    ctx.restore();
+                }
+            }
+
+            const sparkles = Array.from({ length: 75 }, () => new Sparkle());
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                sparkles.forEach(s => { s.update(); s.draw(); });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
 
         // Step-by-step progress visualizer
         function simulateSteps() {
