@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabelSure AI — Legal Metrology Command Center</title>
+    <meta name="description" content="Directorate of Legal Metrology AI Surveillance and Enforcement Dashboard for LMPC Rules 2011">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020617;
+            --card-bg: rgba(10, 18, 38, 0.88);
+            --card-border: rgba(56, 189, 248, 0.22);
+            --card-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85), 0 0 45px -5px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            --cyan-glow: #38bdf8;
+            --blue-accent: #2563eb;
+            --emerald-accent: #34d399;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --heading-gradient: linear-gradient(180deg, #ffffff 40%, #94a3b8 100%);
+            --table-head-bg: rgba(10, 18, 38, 0.95);
+            --table-border: rgba(56, 189, 248, 0.15);
+            --table-hover-bg: rgba(56, 189, 248, 0.05);
+            --input-bg: rgba(4, 9, 22, 0.75);
+            --input-border: rgba(56, 189, 248, 0.25);
+            --input-focus-border: #38bdf8;
+            --input-focus-shadow: rgba(56, 189, 248, 0.2);
+            --input-text: #f8fafc;
+            --input-placeholder: #64748b;
+            --toggle-bg: rgba(15, 23, 42, 0.8);
+            --toggle-border: rgba(56, 189, 248, 0.3);
+            --toggle-text: #38bdf8;
+            --filter-btn-bg: rgba(15, 23, 42, 0.8);
+            --filter-btn-border: rgba(56, 189, 248, 0.2);
+            --filter-btn-text: #cbd5e1;
+            --chip-bg: rgba(255, 255, 255, 0.05);
+            --chip-border: rgba(56, 189, 248, 0.25);
+            --chip-text: #cbd5e1;
+            --stat-card-bg: rgba(10, 18, 38, 0.75);
+            --stat-card-border: rgba(56, 189, 248, 0.18);
+            --stat-glow-indigo: rgba(37, 99, 235, 0.2);
+            --stat-glow-emerald: rgba(52, 211, 153, 0.2);
+            --stat-glow-rose: rgba(244, 63, 94, 0.2);
+            --stat-glow-cyan: rgba(56, 189, 248, 0.2);
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(30, 58, 138, 0.75) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(14, 116, 144, 0.4) 0%, transparent 65%),
+                          linear-gradient(180deg, #050d26 0%, #030712 60%, #02040a 100%);
+            --grid-line-color: rgba(56, 189, 248, 0.04);
+        }
+
+        body.light-theme {
+            --bg-color: #cbdcf7;
+            --card-bg: rgba(255, 255, 255, 0.94);
+            --card-border: rgba(96, 165, 250, 0.45);
+            --card-shadow: 0 24px 45px -15px rgba(29, 78, 216, 0.16), 0 0 35px -5px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --cyan-glow: #0284c7;
+            --blue-accent: #1d4ed8;
+            --emerald-accent: #059669;
+            --text-main: #0f172a;
+            --text-muted: #334155;
+            --heading-gradient: linear-gradient(180deg, #0f172a 30%, #1e3a8a 100%);
+            --table-head-bg: rgba(241, 245, 254, 0.95);
+            --table-border: rgba(96, 165, 250, 0.35);
+            --table-hover-bg: rgba(219, 234, 254, 0.5);
+            --input-bg: rgba(241, 245, 254, 0.95);
+            --input-border: rgba(96, 165, 250, 0.55);
+            --input-focus-border: #1d4ed8;
+            --input-focus-shadow: rgba(29, 78, 216, 0.2);
+            --input-text: #0f172a;
+            --input-placeholder: #94a3b8;
+            --toggle-bg: #ffffff;
+            --toggle-border: #93c5fd;
+            --toggle-text: #1d4ed8;
+            --filter-btn-bg: #ffffff;
+            --filter-btn-border: #93c5fd;
+            --filter-btn-text: #1e3a8a;
+            --chip-bg: #ffffff;
+            --chip-border: #93c5fd;
+            --chip-text: #1e3a8a;
+            --stat-card-bg: rgba(255, 255, 255, 0.85);
+            --stat-card-border: rgba(96, 165, 250, 0.4);
+            --stat-glow-indigo: rgba(29, 78, 216, 0.12);
+            --stat-glow-emerald: rgba(5, 150, 105, 0.12);
+            --stat-glow-rose: rgba(225, 29, 72, 0.12);
+            --stat-glow-cyan: rgba(2, 132, 199, 0.12);
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(96, 165, 250, 0.75) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(56, 189, 248, 0.65) 0%, transparent 65%),
+                          linear-gradient(180deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%);
+            --grid-line-color: rgba(30, 64, 175, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-heading {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 800;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-feature-settings: "tnum" on, "zero" on;
+        }
+
+        /* Ambient Background Atmosphere */
+        .bg-canvas-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glows {
+            position: absolute;
+            inset: 0;
+            background: var(--ambient-bg);
+            filter: blur(40px);
+            transition: background 0.3s ease;
+        }
+
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            background-size: 44px 44px;
+            background-image: 
+                linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+        }
+
+        #ocr-stream-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Theme Switch Button */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--toggle-text);
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+        }
+
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card {
+            background: var(--stat-card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--stat-card-border);
+            box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan-glow);
+            box-shadow: 0 16px 30px -10px rgba(56, 189, 248, 0.25);
+        }
+
+        .glass-subtle {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--table-border);
+        }
+
+        body.light-theme .glass-subtle {
+            background: rgba(241, 245, 254, 0.85);
+            border: 1px solid var(--table-border);
+        }
+
+        .gradient-btn {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #1d4ed8 100%);
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .gradient-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px 0 rgba(56, 189, 248, 0.5);
+            filter: brightness(1.08);
+        }
+
+        .pulse-dot {
+            animation: pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .35; transform: scale(0.8); }
+        }
+
+        .table-row-hover {
+            transition: background 0.15s ease;
+        }
+
+        .table-row-hover:hover {
+            background: var(--table-hover-bg);
+        }
+
+        .badge-pass {
+            background: rgba(34, 197, 94, 0.14);
+            color: var(--emerald-accent);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.15);
+        }
+
+        .badge-fail {
+            background: rgba(244, 63, 94, 0.14);
+            color: #f43f5e;
+            border: 1px solid rgba(244, 63, 94, 0.35);
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.15);
+        }
+
+        .custom-input {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--input-text);
+            transition: all 0.2s ease;
+        }
+
+        .custom-input::placeholder {
+            color: var(--input-placeholder);
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+
+        .chip-button {
+            background: var(--chip-bg);
+            border: 1px solid var(--chip-border);
+            color: var(--chip-text);
+            transition: all 0.2s ease;
+        }
+
+        .chip-button:hover {
+            border-color: var(--cyan-glow);
+            color: var(--cyan-glow);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cyan-glow); }
+    </style>
+</head>
+<body class="min-h-screen text-[var(--text-main)] p-4 md:p-6 antialiased selection:bg-cyan-500/25 selection:text-cyan-200 flex flex-col justify-between">
+
+    <!-- Theme Toggle Button -->
+    <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Toggle visual theme">
+        <span id="themeToggleIcon">☀️</span>
+        <span id="themeToggleText">Light Mode</span>
+    </button>
+
+    <!-- Dynamic Label OCR Reading & Guideline Particle Grid -->
+    <div class="bg-canvas-container">
+        <div class="ambient-glows"></div>
+        <div class="grid-lines"></div>
+        <canvas id="ocr-stream-canvas"></canvas>
+    </div>
+
+    <div class="w-full max-w-7xl mx-auto space-y-6 relative z-10 pr-0 md:pr-28">
+
+        <!-- Top Navigation Bar -->
+        <header class="w-full">
+            <div class="glass-panel rounded-2xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-4">
+                
+                <!-- Logo & Directorate Info -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 p-[1px] shadow-lg shadow-cyan-500/20">
+                        <div class="w-full h-full bg-[#070913] rounded-[11px] flex items-center justify-center">
+                            <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-heading font-bold text-base tracking-tight text-[var(--text-main)]">LabelSure™ AI</span>
+                            <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-cyan-500/20 text-[var(--cyan-glow)] rounded border border-[var(--card-border)] font-mono">COMMAND CENTER</span>
+                        </div>
+                        <p class="text-xs text-[var(--text-muted)] font-medium">Department of Consumer Affairs • Legal Metrology (LMPC 2011) Grid</p>
+                    </div>
+                </div>
+
+                <!-- Live Status & Officer Controls -->
+                <div class="flex items-center flex-wrap gap-3">
+                    <div class="hidden lg:flex items-center gap-2 text-xs font-mono text-[var(--text-muted)] bg-[var(--input-bg)] px-3 py-1.5 rounded-full border border-[var(--card-border)]">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+                        <span id="live-clock">--:--:-- IST</span>
+                        <span class="opacity-40">|</span>
+                        <span class="text-[var(--cyan-glow)] font-medium">Grid Node 01</span>
+                    </div>
+
+                    <!-- Inspector Badge -->
+                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--input-bg)] border border-[var(--card-border)] text-xs">
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-[10px] font-bold text-white uppercase" id="avatar-initials">
+                            IN
+                        </div>
+                        <div class="text-left leading-tight">
+                            <p class="font-semibold text-[var(--text-main)] text-[11px]" id="user-display-name">Insp. R. Sharma</p>
+                            <p class="text-[9px] font-mono text-[var(--cyan-glow)]">DL-MET-402</p>
+                        </div>
+                    </div>
+
+                    <a href="/" class="gradient-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        <span>New Scan</span>
+                    </a>
+
+                    <button id="logout-btn" title="Sign Out" class="p-2 rounded-xl text-[var(--text-muted)] hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Executive Analytics KPI Row -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Total Scans -->
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-2xl pointer-events-none" style="background: var(--stat-glow-indigo)"></div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-medium text-[var(--text-muted)]">Total Inspections</span>
+                    <span class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="stat-total" class="font-heading text-3xl font-extrabold text-[var(--text-main)]">0</h3>
+                    <span class="text-[11px] font-medium text-emerald-500 flex items-center">↑ Real-Time</span>
+                </div>
+                <p class="text-[11px] text-[var(--text-muted)] mt-2">Digital metrology audit pipeline</p>
+            </div>
+
+            <!-- Compliant (Pass) -->
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-2xl pointer-events-none" style="background: var(--stat-glow-emerald)"></div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-medium text-[var(--text-muted)]">Compliant (PASS)</span>
+                    <span class="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="stat-pass" class="font-heading text-3xl font-extrabold text-emerald-500">0</h3>
+                    <span id="stat-pass-rate" class="text-[11px] font-medium text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded">0%</span>
+                </div>
+                <p class="text-[11px] text-[var(--text-muted)] mt-2">Full statutory rule compliance</p>
+            </div>
+
+            <!-- Violations (Fail) -->
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-2xl pointer-events-none" style="background: var(--stat-glow-rose)"></div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-medium text-[var(--text-muted)]">Violations (FAIL)</span>
+                    <span class="p-2 rounded-lg bg-rose-500/10 text-rose-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="stat-fail" class="font-heading text-3xl font-extrabold text-rose-500">0</h3>
+                    <span class="text-[11px] font-medium text-rose-600 bg-rose-500/10 px-1.5 py-0.5 rounded">Section 36</span>
+                </div>
+                <p class="text-[11px] text-[var(--text-muted)] mt-2">Statutory penalty notices issued</p>
+            </div>
+
+            <!-- Average Score -->
+            <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-2xl pointer-events-none" style="background: var(--stat-glow-cyan)"></div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-medium text-[var(--text-muted)]">Avg LMPC Index</span>
+                    <span class="p-2 rounded-lg bg-cyan-500/10 text-[var(--cyan-glow)]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <h3 id="stat-avg" class="font-heading text-3xl font-extrabold text-[var(--cyan-glow)]">0</h3>
+                    <span class="text-xs font-semibold text-[var(--text-muted)]">/ 100</span>
+                </div>
+                <div class="w-full bg-[var(--table-border)] rounded-full h-1.5 mt-3 overflow-hidden">
+                    <div id="stat-avg-bar" class="bg-gradient-to-r from-cyan-500 to-blue-600 h-1.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace: Search, Filters, Seed & Action Bar -->
+        <section class="glass-panel rounded-3xl p-5 sm:p-6 space-y-5">
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                
+                <!-- Left: Search Box -->
+                <div class="relative flex-1 max-w-md">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-muted)]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <input type="text" id="search" placeholder="Search by product name, scan ID, or brand…"
+                        class="custom-input w-full pl-10 pr-4 py-2.5 rounded-xl text-xs">
+                </div>
+
+                <!-- Center: Filter Buttons -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+                    <button data-filter="all" class="filter-pill px-3.5 py-2 rounded-xl text-xs font-semibold gradient-btn text-white shadow-md transition">
+                        All Records (<span id="count-all">0</span>)
+                    </button>
+                    <button data-filter="PASS" class="filter-pill px-3.5 py-2 rounded-xl text-xs font-semibold chip-button transition">
+                        Compliant Only (<span id="count-pass">0</span>)
+                    </button>
+                    <button data-filter="FAIL" class="filter-pill px-3.5 py-2 rounded-xl text-xs font-semibold chip-button transition">
+                        Violations Only (<span id="count-fail">0</span>)
+                    </button>
+                </div>
+
+                <!-- Right: Action Utilities -->
+                <div class="flex items-center gap-2.5">
+                    <button id="export-csv-btn" class="chip-button flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium" title="Export CSV for Official Legal Metrology Records">
+                        <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>Export CSV</span>
+                    </button>
+
+                    <button id="seed-demo-btn" class="chip-button flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-[var(--cyan-glow)]" title="Load real benchmark inspection cases for Hackathon demonstration">
+                        <span class="text-amber-400">⚡</span>
+                        <span>Load Benchmarks</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Master Table Container -->
+            <div class="overflow-x-auto rounded-2xl border border-[var(--table-border)] bg-[var(--table-head-bg)]">
+                <table class="w-full text-left text-xs text-[var(--text-main)]">
+                    <thead class="bg-[var(--table-head-bg)] text-[11px] uppercase tracking-wider text-[var(--text-muted)] border-b border-[var(--table-border)]">
+                        <tr>
+                            <th scope="col" class="py-3.5 px-4 font-semibold">Product & Packaging</th>
+                            <th scope="col" class="py-3.5 px-3 font-semibold">Inspection ID & Time</th>
+                            <th scope="col" class="py-3.5 px-3 font-semibold text-center">Status</th>
+                            <th scope="col" class="py-3.5 px-3 font-semibold text-center">LMPC Score</th>
+                            <th scope="col" class="py-3.5 px-4 font-semibold text-right">Statutory Notices & Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scans-body" class="divide-y divide-[var(--table-border)] font-sans">
+                        <!-- Dynamically populated rows -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="py-16 text-center space-y-3">
+                <div class="w-10 h-10 border-2 border-cyan-500/20 border-t-[var(--cyan-glow)] rounded-full animate-spin mx-auto"></div>
+                <p class="text-xs font-mono text-[var(--text-muted)]">Syncing statutory records from dual-layer ledger…</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden py-16 text-center space-y-4">
+                <div class="w-16 h-16 mx-auto rounded-2xl bg-[var(--input-bg)] border border-[var(--card-border)] flex items-center justify-center text-[var(--text-muted)] shadow-inner">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <div>
+                    <h3 class="font-heading font-bold text-base text-[var(--text-main)]">No Inspection Records Found</h3>
+                    <p class="text-xs text-[var(--text-muted)] mt-1 max-w-sm mx-auto">Upload a commodity label or load the pre-configured SIH benchmark cases.</p>
+                </div>
+                <div class="flex items-center justify-center gap-3">
+                    <a href="/" class="gradient-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white">
+                        Run New Scan →
+                    </a>
+                    <button onclick="seedBenchmarks()" class="chip-button px-4 py-2 rounded-xl text-xs font-semibold">
+                        Seed Benchmarks
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- Inspection Detail Slide-over / Modal -->
+    <div id="detail-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 relative border border-[var(--card-border)] shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            
+            <div class="flex items-start justify-between border-b border-[var(--table-border)] pb-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span id="modal-status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">STATUS</span>
+                        <span id="modal-scan-id" class="font-mono text-xs text-[var(--cyan-glow)]">SCAN-ID</span>
+                    </div>
+                    <h2 id="modal-product-title" class="font-heading font-bold text-xl text-[var(--text-main)]">Product Name</h2>
+                    <p id="modal-date" class="text-xs text-[var(--text-muted)] font-mono mt-0.5">Date</p>
+                </div>
+                <button id="modal-close-btn" class="p-2 rounded-xl chip-button transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Details Content -->
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="glass-subtle rounded-xl p-3 border border-[var(--table-border)]">
+                        <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Compliance Score</span>
+                        <span id="modal-score" class="font-heading text-2xl font-bold text-[var(--text-main)]">0/100</span>
+                    </div>
+                    <div class="glass-subtle rounded-xl p-3 border border-[var(--table-border)]">
+                        <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block">Governing Legislation</span>
+                        <span class="font-mono text-xs text-[var(--cyan-glow)] mt-1 block">LMPC Rules, 2011 (Sec 6 & 18)</span>
+                    </div>
+                </div>
+
+                <!-- Preview Image -->
+                <div id="modal-image-container" class="rounded-xl overflow-hidden border border-[var(--table-border)] bg-[var(--input-bg)] text-center p-2 hidden">
+                    <img id="modal-image" src="" alt="Package" class="max-h-48 mx-auto rounded object-contain">
+                </div>
+
+                <!-- Violations / Passed Checks List -->
+                <div>
+                    <h4 class="text-xs font-semibold text-[var(--text-main)] uppercase tracking-wider mb-2">Statutory Metrology Findings</h4>
+                    <div id="modal-findings" class="space-y-2 text-xs">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-[var(--table-border)]">
+                <a id="modal-pdf-link" href="#" target="_blank" class="px-4 py-2 rounded-xl chip-button text-xs font-semibold inline-flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    Download Official Notice (PDF)
+                </a>
+                <button onclick="document.getElementById('detail-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl gradient-btn text-xs font-semibold text-white">
+                    Done
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-7xl mx-auto py-4 text-center border-t border-[var(--table-border)] mt-6 relative z-10">
+        <p class="text-[11px] text-[var(--text-muted)]">
+            Legal Metrology (Packaged Commodities) Rules, 2011 Automated Inspection System • Built for Smart India Hackathon
+        </p>
+    </footer>
+
+    <!-- OCR & GUIDELINE VERIFICATION BACKGROUND ENGINE -->
+    <script>
+        let isLightMode = false;
+
+        // Theme Switch Handler
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+        const themeToggleText = document.getElementById("themeToggleText");
+
+        themeToggleBtn.addEventListener("click", () => {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle("light-theme", isLightMode);
+            themeToggleIcon.textContent = isLightMode ? "🌙" : "☀️";
+            themeToggleText.textContent = isLightMode ? "Dark Mode" : "Light Mode";
+        });
+
+        (function () {
+            const canvas = document.getElementById("ocr-stream-canvas");
+            const ctx = canvas.getContext("2d");
+            let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+            const mouse = { x: -1000, y: -1000, active: false };
+            window.addEventListener("mousemove", (e) => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+                mouse.active = true;
+            });
+            window.addEventListener("mouseleave", () => {
+                mouse.active = false;
+            });
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + "px";
+                canvas.style.height = height + "px";
+                ctx.scale(dpr, dpr);
+            }
+            window.addEventListener("resize", resize);
+            resize();
+
+            const LABEL_TOKENS = [
+                "NET QTY 500g",
+                "MRP ₹280.00",
+                "USP: ₹0.56/g",
+                "RULE 6(1)(a) PASS",
+                "BATCH: L-2026",
+                "PKD: 08/2026",
+                "EXP: 12 MONTHS",
+                "MFG LIC #1001",
+                "PDP: 4.2mm HGT",
+                "ORIGIN: INDIA",
+                "SCHED-V COMPLIANT",
+                "E211 PRESERVATIVE",
+                "ALLERGEN: SOY",
+                "FSSAI 100140"
+            ];
+
+            const TOTAL_NODES = 55;
+
+            class LabelScanNode {
+                constructor() {
+                    this.init(true);
+                }
+
+                init(randomY = false) {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : height + Math.random() * 40;
+                    this.text = LABEL_TOKENS[Math.floor(Math.random() * LABEL_TOKENS.length)];
+                    this.type = Math.random() > 0.45 ? "TOKEN" : "RETICLE";
+                    
+                    this.alpha = Math.random() * 0.5 + 0.15;
+                    this.fadeSpeed = (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1);
+                    
+                    this.vx = (Math.random() - 0.5) * 0.25;
+                    this.vy = -(Math.random() * 0.35 + 0.15);
+                    
+                    this.boxSize = Math.random() * 14 + 16;
+                    this.fontSize = Math.floor(Math.random() * 2) + 10;
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha += this.fadeSpeed;
+
+                    if (this.alpha >= 0.75) {
+                        this.alpha = 0.75;
+                        this.fadeSpeed = -Math.abs(this.fadeSpeed);
+                    } else if (this.alpha <= 0.08) {
+                        this.fadeSpeed = Math.abs(this.fadeSpeed);
+                    }
+
+                    if (this.y < -40 || this.x < -40 || this.x > width + 40) {
+                        this.init(false);
+                    }
+                }
+
+                draw() {
+                    const dx = this.x - mouse.x;
+                    const dy = this.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const isHovered = mouse.active && dist < 140;
+                    
+                    const currentAlpha = isHovered ? Math.min(1, this.alpha + 0.4) : this.alpha;
+                    const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+                    const dotRgb = isLightMode ? "4, 120, 87" : "52, 211, 153";
+
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+
+                    if (this.type === "TOKEN") {
+                        ctx.font = `600 ${this.fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+                        ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.95})`;
+                        ctx.fillText(this.text, 0, 0);
+
+                        ctx.beginPath();
+                        ctx.arc(-6, -3, 1.5, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${dotRgb}, ${currentAlpha})`;
+                        ctx.fill();
+                    } else {
+                        const s = this.boxSize;
+                        const arm = 5;
+                        ctx.strokeStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.85})`;
+                        ctx.lineWidth = 1;
+
+                        ctx.beginPath();
+                        ctx.moveTo(-s, -s + arm); ctx.lineTo(-s, -s); ctx.lineTo(-s + arm, -s);
+                        ctx.moveTo(s - arm, -s); ctx.lineTo(s, -s); ctx.lineTo(s, -s + arm);
+                        ctx.moveTo(-s, s - arm); ctx.lineTo(-s, s); ctx.lineTo(-s + arm, s);
+                        ctx.moveTo(s - arm, s); ctx.lineTo(s, s); ctx.lineTo(s, s - arm);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 1.2, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha})`;
+                        ctx.fill();
+                    }
+
+                    ctx.restore();
+
+                    if (isHovered) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - dist / 140) * 0.4})`;
+                        ctx.lineWidth = 0.9;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            const nodes = Array.from({ length: TOTAL_NODES }, () => new LabelScanNode());
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const dx = nodes[i].x - nodes[j].x;
+                        const dy = nodes[i].y - nodes[j].y;
+                        const d = Math.sqrt(dx * dx + dy * dy);
+                        if (d < 95) {
+                            ctx.beginPath();
+                            ctx.moveTo(nodes[i].x, nodes[i].y);
+                            ctx.lineTo(nodes[j].x, nodes[j].y);
+                            ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - d / 95) * 0.12})`;
+                            ctx.lineWidth = 0.7;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                for (let i = 0; i < nodes.length; i++) {
+                    nodes[i].update();
+                    nodes[i].draw();
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        })();
+
+        /* Dashboard Controller */
+        const API = window.location.origin;
+        let allScans = [];
+        let currentFilter = 'all';
+
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-IN', { hour12: false, timeZone: 'Asia/Kolkata' }) + ' IST';
+            const clockEl = document.getElementById('live-clock');
+            if (clockEl) clockEl.textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const storedEmail = sessionStorage.getItem('user_email');
+        if (storedEmail) {
+            document.getElementById('user-display-name').textContent = storedEmail.split('@')[0];
+            document.getElementById('avatar-initials').textContent = storedEmail.slice(0, 2).toUpperCase();
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.clear();
+            window.location.href = '/static/login.html';
+        });
+
+        async function loadScans() {
+            const userEmail = sessionStorage.getItem('user_email') || '';
+            try {
+                const url = userEmail ? `${API}/scans?user_email=${encodeURIComponent(userEmail)}` : `${API}/scans`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    allScans = await res.json();
+                } else {
+                    allScans = [];
+                }
+            } catch (err) {
+                console.warn('Could not fetch scans from backend:', err);
+                allScans = [];
+            }
+
+            document.getElementById('loading-state').classList.add('hidden');
+            renderStats();
+            renderTable();
+        }
+
+        function getBenchmarkDataset() {
+            return [
+                {
+                    id: "LMPC-IND-8821",
+                    product_name: "Amul Pasteurised Butter 500g",
+                    created_at: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
+                    pass_fail: "PASS",
+                    score: 95,
+                    image_url: "/static/samples/sample_compliant.png",
+                    report_url: "/reports/test.pdf",
+                    pdf_url: "/reports/test.pdf",
+                    docx_url: "/reports/test.docx",
+                    details: [
+                        { rule: "Rule 6(1)(a)", desc: "Product identity explicitly declared: Butter", status: "PASS" },
+                        { rule: "Rule 6(1)(b)", desc: "Manufacturer Name & Full Address: Gujarat Co-operative Milk Marketing Fed.", status: "PASS" },
+                        { rule: "Rule 6(1)(c)", desc: "Net Quantity 500g in metric unit with standard font size 4.2mm", status: "PASS" },
+                        { rule: "Rule 6(1)(d)", desc: "Unit Sale Price (Rs. 0.56/g) printed alongside MRP", status: "PASS" },
+                        { rule: "Rule 6(1)(e)", desc: "Consumer Care toll-free & email: customercare@amul.coop", status: "PASS" }
+                    ]
+                },
+                {
+                    id: "LMPC-IMP-3409",
+                    product_name: "Pacific Foods Organic Tomato Soup (Imported)",
+                    created_at: new Date(Date.now() - 1000 * 60 * 75).toISOString(),
+                    pass_fail: "FAIL",
+                    score: 52,
+                    image_url: "/static/samples/sample_imported.jpg",
+                    report_url: "/reports/test.pdf",
+                    pdf_url: "/reports/test.pdf",
+                    docx_url: "/reports/test.docx",
+                    details: [
+                        { rule: "Rule 6(1)(e)", desc: "Missing Indian Rupee (INR) MRP declaration on outer container", status: "FAIL" },
+                        { rule: "Rule 6(2)", desc: "Missing Registered Importer Name & Indian Address label", status: "FAIL" },
+                        { rule: "Rule 6(1)(c)", desc: "Missing Indian Consumer Redressal Contact within jurisdiction", status: "FAIL" },
+                        { rule: "Rule 12", desc: "Net Quantity declared in mL (946 mL) compliant with metric schedule", status: "PASS" },
+                        { rule: "Rule 6(1)(a)", desc: "Country of Origin explicitly printed: USA", status: "PASS" }
+                    ]
+                },
+                {
+                    id: "LMPC-IND-7140",
+                    product_name: "Parle-G Gluco Biscuits 800g Family Pack",
+                    created_at: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+                    pass_fail: "PASS",
+                    score: 92,
+                    image_url: "/static/samples/sample_compliant.png",
+                    report_url: "/reports/test.pdf",
+                    pdf_url: "/reports/test.pdf",
+                    docx_url: "/reports/test.docx",
+                    details: [
+                        { rule: "Rule 6(1)(a)", desc: "Generic Commodity Name clearly visible on Principal Display Panel", status: "PASS" },
+                        { rule: "Rule 6(1)(c)", desc: "Net Quantity 800g with adequate PDP font clearance", status: "PASS" },
+                        { rule: "Rule 6(1)(d)", desc: "MRP inclusive of all taxes with Unit Sale Price indicated", status: "PASS" },
+                        { rule: "Rule 6(1)(b)", desc: "Batch Number & Month/Year of packing declared", status: "PASS" }
+                    ]
+                },
+                {
+                    id: "LMPC-IMP-1092",
+                    product_name: "Lindt Excellence 85% Cocoa Dark Chocolate 100g",
+                    created_at: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
+                    pass_fail: "FAIL",
+                    score: 64,
+                    image_url: "/static/samples/sample_imported.jpg",
+                    report_url: "/reports/test.pdf",
+                    pdf_url: "/reports/test.pdf",
+                    docx_url: "/reports/test.docx",
+                    details: [
+                        { rule: "Rule 6(1)(d)", desc: "Unit Sale Price not declared on sticker overlay", status: "FAIL" },
+                        { rule: "Rule 7", desc: "Font height on Indian sticker below 2.0mm minimum threshold", status: "FAIL" },
+                        { rule: "Rule 6(1)(a)", desc: "Country of Origin declared: Switzerland", status: "PASS" }
+                    ]
+                },
+                {
+                    id: "LMPC-IND-9402",
+                    product_name: "Tata Salt Vacuum Evaporated Iodized 1kg",
+                    created_at: new Date(Date.now() - 1000 * 60 * 720).toISOString(),
+                    pass_fail: "PASS",
+                    score: 96,
+                    image_url: "/static/samples/sample_compliant.png",
+                    report_url: "/reports/test.pdf",
+                    pdf_url: "/reports/test.pdf",
+                    docx_url: "/reports/test.docx",
+                    details: [
+                        { rule: "Rule 6(1)(a)", desc: "Statutory mandatory declarations on PDP 100% compliant", status: "PASS" },
+                        { rule: "Rule 6(1)(c)", desc: "Net Quantity 1kg compliant with Fifth Schedule standard pack sizes", status: "PASS" }
+                    ]
+                }
+            ];
+        }
+
+        window.seedBenchmarks = function() {
+            const benchmarks = getBenchmarkDataset();
+            const existingIds = new Set(allScans.map(s => s.id));
+            for (const b of benchmarks) {
+                if (!existingIds.has(b.id)) {
+                    allScans.unshift(b);
+                }
+            }
+            renderStats();
+            renderTable();
+            const btn = document.getElementById('seed-demo-btn');
+            btn.innerHTML = '<span class="text-emerald-500">✓</span> Loaded!';
+            setTimeout(() => {
+                btn.innerHTML = '<span class="text-amber-400">⚡</span> <span>Load Benchmarks</span>';
+            }, 1500);
+        };
+
+        document.getElementById('seed-demo-btn').addEventListener('click', window.seedBenchmarks);
+
+        function renderStats() {
+            const total = allScans.length;
+            const passed = allScans.filter(s => (s.pass_fail || '').toUpperCase() === 'PASS').length;
+            const failed = total - passed;
+            const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+            const avg = total > 0 ? Math.round(allScans.reduce((acc, s) => acc + (Number(s.score) || 0), 0) / total) : 0;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-pass').textContent = passed;
+            document.getElementById('stat-pass-rate').textContent = `${passRate}%`;
+            document.getElementById('stat-fail').textContent = failed;
+            document.getElementById('stat-avg').textContent = avg;
+            document.getElementById('stat-avg-bar').style.width = `${avg}%`;
+
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-pass').textContent = passed;
+            document.getElementById('count-fail').textContent = failed;
+        }
+
+        function renderTable() {
+            const query = (document.getElementById('search').value || '').toLowerCase();
+            const body = document.getElementById('scans-body');
+
+            let filtered = allScans;
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(s => (s.pass_fail || '').toUpperCase() === currentFilter);
+            }
+
+            if (query) {
+                filtered = filtered.filter(s => 
+                    (s.product_name || '').toLowerCase().includes(query) ||
+                    (s.id || '').toLowerCase().includes(query)
+                );
+            }
+
+            if (filtered.length === 0) {
+                body.innerHTML = '';
+                document.getElementById('empty-state').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('empty-state').classList.add('hidden');
+
+            body.innerHTML = filtered.map((s, idx) => {
+                const isPass = (s.pass_fail || '').toUpperCase() === 'PASS';
+                const score = Number(s.score) || 0;
+                const scoreColor = score >= 80 ? 'text-emerald-500' : score >= 60 ? 'text-amber-500' : 'text-rose-500';
+                const scoreBarColor = score >= 80 ? 'bg-emerald-500' : score >= 60 ? 'bg-amber-500' : 'bg-rose-500';
+                const dateStr = s.created_at ? new Date(s.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Recent';
+                const timeStr = s.created_at ? new Date(s.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '';
+
+                const scanId = s.id ? s.id.slice(0, 14) : `SCN-${idx + 100}`;
+                const pdfUrl = s.report_url || s.pdf_url || `/reports/${s.id}_report.pdf`;
+                const docxUrl = s.docx_url || `/reports/${s.id}_report.docx`;
+                const imgThumb = s.image_url || '/static/samples/sample_compliant.png';
+
+                return `
+                <tr class="table-row-hover cursor-pointer" onclick="openInspectionModal('${escapeJs(s.id)}')">
+                    <td class="py-3.5 px-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-[var(--input-bg)] border border-[var(--table-border)] flex-shrink-0 flex items-center justify-center">
+                                <img src="${escapeHtml(imgThumb)}" alt="Thumb" class="w-full h-full object-cover" onerror="this.src='/static/samples/sample_compliant.png'">
+                            </div>
+                            <div class="truncate max-w-xs sm:max-w-sm">
+                                <p class="font-semibold text-[var(--text-main)] truncate text-xs">${escapeHtml(s.product_name || 'Packaged Commodity')}</p>
+                                <span class="text-[10px] text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
+                                    <span class="w-1.5 h-1.5 rounded-full ${isPass ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                                    <span>${isPass ? 'LMPC Schedule I-V Verified' : 'Statutory Defect Flagged'}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="py-3.5 px-3">
+                        <p class="font-mono text-[11px] text-[var(--cyan-glow)] font-semibold">${escapeHtml(scanId)}</p>
+                        <p class="text-[10px] text-[var(--text-muted)] font-mono">${dateStr} ${timeStr}</p>
+                    </td>
+
+                    <td class="py-3.5 px-3 text-center">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${isPass ? 'badge-pass' : 'badge-fail'}">
+                            ${isPass ? '✓ PASS' : '✕ FAIL'}
+                        </span>
+                    </td>
+
+                    <td class="py-3.5 px-3 text-center">
+                        <div class="inline-flex flex-col items-center">
+                            <span class="font-heading font-extrabold text-sm ${scoreColor}">${score}%</span>
+                            <div class="w-12 bg-[var(--table-border)] rounded-full h-1 mt-1 overflow-hidden">
+                                <div class="${scoreBarColor} h-1 rounded-full" style="width: ${score}%"></div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="py-3.5 px-4 text-right" onclick="event.stopPropagation()">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <a href="${escapeHtml(pdfUrl)}" target="_blank" class="p-1.5 rounded-lg chip-button transition" title="View Official PDF Metrology Notice">
+                                <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            </a>
+                            <a href="${escapeHtml(docxUrl)}" target="_blank" class="p-1.5 rounded-lg chip-button transition" title="Download Word Notice (DOCX)">
+                                <svg class="w-4 h-4 text-[var(--cyan-glow)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </a>
+                            <button onclick="openInspectionModal('${escapeJs(s.id)}')" class="px-2.5 py-1 rounded-lg chip-button text-[var(--cyan-glow)] text-[11px] font-semibold border-[var(--card-border)]">
+                                Audit Brief
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        window.openInspectionModal = function(scanId) {
+            const scan = allScans.find(s => s.id === scanId) || allScans[0];
+            if (!scan) return;
+
+            const isPass = (scan.pass_fail || '').toUpperCase() === 'PASS';
+            document.getElementById('modal-scan-id').textContent = scan.id || 'LMPC-AUDIT-2026';
+            document.getElementById('modal-product-title').textContent = scan.product_name || 'Packaged Commodity';
+            document.getElementById('modal-date').textContent = `Inspected: ${scan.created_at ? new Date(scan.created_at).toLocaleString('en-IN') : 'Recent'}`;
+            document.getElementById('modal-score').textContent = `${scan.score || 0}/100`;
+
+            const badge = document.getElementById('modal-status-badge');
+            badge.textContent = isPass ? 'COMPLIANT' : 'STATUTORY VIOLATION';
+            badge.className = `px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${isPass ? 'badge-pass' : 'badge-fail'}`;
+
+            const imgContainer = document.getElementById('modal-image-container');
+            const modalImg = document.getElementById('modal-image');
+            if (scan.image_url) {
+                modalImg.src = scan.image_url;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.classList.add('hidden');
+            }
+
+            const findingsEl = document.getElementById('modal-findings');
+            const details = scan.details || [
+                { rule: "Rule 6(1)(a)", desc: "Commodity identification name declaration check", status: isPass ? "PASS" : "FAIL" },
+                { rule: "Rule 6(1)(c)", desc: "Net Quantity font size and metric unit validation", status: isPass ? "PASS" : "PASS" },
+                { rule: "Rule 6(1)(d)", desc: "Maximum Retail Price (MRP) & Unit Sale Price declaration", status: isPass ? "PASS" : "FAIL" }
+            ];
+
+            findingsEl.innerHTML = details.map(d => `
+                <div class="p-2.5 rounded-xl ${d.status === 'PASS' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-500' : 'bg-rose-500/10 border border-rose-500/20 text-rose-500'} flex items-start justify-between gap-2">
+                    <div>
+                        <span class="font-mono font-bold text-[10px] opacity-80">${escapeHtml(d.rule)}</span>
+                        <p class="text-[11px] text-[var(--text-main)] mt-0.5">${escapeHtml(d.desc)}</p>
+                    </div>
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${d.status === 'PASS' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}">${d.status}</span>
+                </div>
+            `).join('');
+
+            const pdfLink = document.getElementById('modal-pdf-link');
+            pdfLink.href = scan.report_url || scan.pdf_url || `/reports/${scan.id}_report.pdf`;
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        };
+
+        document.getElementById('modal-close-btn').addEventListener('click', () => {
+            document.getElementById('detail-modal').classList.add('hidden');
+        });
+
+        // Filter pills handler
+        document.querySelectorAll('.filter-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-pill').forEach(b => {
+                    b.className = 'filter-pill px-3.5 py-2 rounded-xl text-xs font-semibold chip-button transition';
+                });
+                btn.className = 'filter-pill px-3.5 py-2 rounded-xl text-xs font-semibold gradient-btn text-white shadow-md transition';
+                currentFilter = btn.dataset.filter;
+                renderTable();
+            });
+        });
+
+        document.getElementById('search').addEventListener('input', renderTable);
+
+        document.getElementById('export-csv-btn').addEventListener('click', () => {
+            if (!allScans || allScans.length === 0) {
+                alert('No inspection records available to export.');
+                return;
+            }
+
+            let csv = 'Scan ID,Product Name,Status,Score,Inspection Date,PDF Report URL\n';
+            for (const s of allScans) {
+                const id = `"${(s.id || '').replace(/"/g, '""')}"`;
+                const name = `"${(s.product_name || '').replace(/"/g, '""')}"`;
+                const status = (s.pass_fail || 'FAIL').toUpperCase();
+                const score = s.score || 0;
+                const date = `"${(s.created_at || new Date().toISOString()).replace(/"/g, '""')}"`;
+                const url = `"${(s.report_url || s.pdf_url || '').replace(/"/g, '""')}"`;
+                csv += `${id},${name},${status},${score},${date},${url}\n`;
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `lmpc_inspections_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const d = document.createElement('div');
+            d.textContent = String(str);
+            return d.innerHTML;
+        }
+
+        function escapeJs(str) {
+            if (!str) return '';
+            return String(str).replace(/'/g, "\\'");
+        }
+
+        loadScans();
+    </script>
+</body>
+</html>

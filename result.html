@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabelSure AI — Compliance Audit Results</title>
+    <meta name="description" content="Legal Metrology LMPC 2011 Compliance Audit Findings, Field Reconciliations and Report Generation">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020617;
+            --card-bg: rgba(10, 18, 38, 0.88);
+            --card-border: rgba(56, 189, 248, 0.22);
+            --card-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85), 0 0 45px -5px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            --cyan-glow: #38bdf8;
+            --blue-accent: #2563eb;
+            --emerald-accent: #34d399;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --heading-gradient: linear-gradient(180deg, #ffffff 40%, #94a3b8 100%);
+            --input-bg: rgba(4, 9, 22, 0.75);
+            --input-border: rgba(56, 189, 248, 0.25);
+            --input-focus-border: #38bdf8;
+            --input-focus-shadow: rgba(56, 189, 248, 0.2);
+            --input-text: #f8fafc;
+            --input-placeholder: #64748b;
+            --toggle-bg: rgba(15, 23, 42, 0.8);
+            --toggle-border: rgba(56, 189, 248, 0.3);
+            --toggle-text: #38bdf8;
+            --chip-bg: rgba(255, 255, 255, 0.05);
+            --chip-border: rgba(56, 189, 248, 0.25);
+            --chip-text: #cbd5e1;
+            --stat-glow-indigo: rgba(37, 99, 235, 0.25);
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(30, 58, 138, 0.75) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(14, 116, 144, 0.4) 0%, transparent 65%),
+                          linear-gradient(180deg, #050d26 0%, #030712 60%, #02040a 100%);
+            --grid-line-color: rgba(56, 189, 248, 0.04);
+            --field-card-hover-border: rgba(56, 189, 248, 0.45);
+        }
+
+        body.light-theme {
+            --bg-color: #cbdcf7;
+            --card-bg: rgba(255, 255, 255, 0.94);
+            --card-border: rgba(96, 165, 250, 0.45);
+            --card-shadow: 0 24px 45px -15px rgba(29, 78, 216, 0.16), 0 0 35px -5px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --cyan-glow: #0284c7;
+            --blue-accent: #1d4ed8;
+            --emerald-accent: #059669;
+            --text-main: #0f172a;
+            --text-muted: #334155;
+            --heading-gradient: linear-gradient(180deg, #0f172a 30%, #1e3a8a 100%);
+            --input-bg: rgba(241, 245, 254, 0.95);
+            --input-border: rgba(96, 165, 250, 0.55);
+            --input-focus-border: #1d4ed8;
+            --input-focus-shadow: rgba(29, 78, 216, 0.2);
+            --input-text: #0f172a;
+            --input-placeholder: #94a3b8;
+            --toggle-bg: #ffffff;
+            --toggle-border: #93c5fd;
+            --toggle-text: #1d4ed8;
+            --chip-bg: #ffffff;
+            --chip-border: #93c5fd;
+            --chip-text: #1e3a8a;
+            --stat-glow-indigo: rgba(29, 78, 216, 0.15);
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(96, 165, 250, 0.75) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(56, 189, 248, 0.65) 0%, transparent 65%),
+                          linear-gradient(180deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%);
+            --grid-line-color: rgba(30, 64, 175, 0.08);
+            --field-card-hover-border: rgba(29, 78, 216, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-heading {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-weight: 800;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-feature-settings: "tnum" on, "zero" on;
+        }
+
+        /* Ambient Background Atmosphere */
+        .bg-canvas-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glows {
+            position: absolute;
+            inset: 0;
+            background: var(--ambient-bg);
+            filter: blur(40px);
+            transition: background 0.3s ease;
+        }
+
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            background-size: 44px 44px;
+            background-image: 
+                linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+        }
+
+        #ocr-stream-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Theme Switch Button */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--toggle-text);
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+        }
+
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-subtle {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+        }
+
+        body.light-theme .glass-subtle {
+            background: rgba(241, 245, 254, 0.85);
+            border: 1px solid var(--card-border);
+        }
+
+        .gradient-btn {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #1d4ed8 100%);
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .gradient-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px 0 rgba(56, 189, 248, 0.5);
+            filter: brightness(1.08);
+        }
+
+        .field-card {
+            transition: all 0.2s ease;
+        }
+        .field-card:hover {
+            border-color: var(--field-card-hover-border);
+        }
+
+        .download-btn {
+            transition: all 0.2s ease;
+        }
+        .download-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.08);
+        }
+
+        .custom-input {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--input-text);
+            transition: all 0.2s ease;
+        }
+
+        .custom-input::placeholder {
+            color: var(--input-placeholder);
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+
+        .chip-button {
+            background: var(--chip-bg);
+            border: 1px solid var(--chip-border);
+            color: var(--chip-text);
+            transition: all 0.2s ease;
+        }
+
+        .chip-button:hover {
+            border-color: var(--cyan-glow);
+            color: var(--cyan-glow);
+        }
+
+        .source-pill-both { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.35); }
+        .source-pill-groq { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); }
+        .source-pill-ocr { background: rgba(96, 165, 250, 0.15); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.35); }
+        .source-pill-none { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.35); }
+
+        body.light-theme .source-pill-both { background: rgba(5, 150, 105, 0.12); color: #047857; border: 1px solid rgba(5, 150, 105, 0.35); }
+        body.light-theme .source-pill-groq { background: rgba(2, 132, 199, 0.12); color: #0369a1; border: 1px solid rgba(2, 132, 199, 0.35); }
+        body.light-theme .source-pill-ocr { background: rgba(29, 78, 216, 0.12); color: #1e40af; border: 1px solid rgba(29, 78, 216, 0.35); }
+        body.light-theme .source-pill-none { background: rgba(225, 29, 72, 0.12); color: #be123c; border: 1px solid rgba(225, 29, 72, 0.35); }
+
+        .score-ring { width: 140px; height: 140px; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cyan-glow); }
+    </style>
+</head>
+<body class="min-h-screen text-[var(--text-main)] p-4 md:p-8 antialiased selection:bg-cyan-500/25 selection:text-cyan-200 flex flex-col justify-between">
+
+    <!-- Theme Toggle Button -->
+    <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Toggle visual theme">
+        <span id="themeToggleIcon">☀️</span>
+        <span id="themeToggleText">Light Mode</span>
+    </button>
+
+    <!-- Dynamic Label OCR Reading & Guideline Particle Grid -->
+    <div class="bg-canvas-container">
+        <div class="ambient-glows"></div>
+        <div class="grid-lines"></div>
+        <canvas id="ocr-stream-canvas"></canvas>
+    </div>
+
+    <!-- Top Navigation -->
+    <header class="w-full max-w-7xl mx-auto mb-6 relative z-10 pr-0 md:pr-28">
+        <div class="glass-panel rounded-2xl px-5 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/" class="flex items-center gap-2 group">
+                    <div class="w-9 h-9 rounded-xl gradient-btn flex items-center justify-center text-white shadow-md">
+                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                    </div>
+                    <div>
+                        <span class="font-heading font-bold text-sm text-[var(--text-main)] group-hover:text-[var(--cyan-glow)] transition">← New Inspection</span>
+                        <p class="text-[11px] text-[var(--text-muted)]">Back to Scanner</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <span id="scan-id-chip" class="font-mono text-xs px-3 py-1 bg-[var(--input-bg)] rounded-full border border-[var(--card-border)] text-[var(--text-muted)]">
+                    SCAN ID: <span id="scan-id-text" class="text-[var(--cyan-glow)] font-semibold">--------</span>
+                </span>
+                <a href="/static/dashboard.html" class="flex items-center gap-1.5 text-xs font-semibold chip-button px-3 py-1.5 rounded-lg transition">
+                    <svg class="w-4 h-4 text-[var(--cyan-glow)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    Dashboard
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="w-full max-w-7xl mx-auto relative z-10">
+        
+        <!-- Empty / No Data State -->
+        <div id="no-data" class="hidden glass-panel rounded-3xl p-16 text-center max-w-md mx-auto my-16">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[var(--input-bg)] border border-[var(--card-border)] flex items-center justify-center text-[var(--text-muted)] shadow-inner">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <h2 class="font-heading font-bold text-lg text-[var(--text-main)] mb-1">No Active Scan Session</h2>
+            <p class="text-xs text-[var(--text-muted)] mb-6">Upload a label image or supply a product link to run statutory metrology audit.</p>
+            <a href="/" class="gradient-btn inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white">
+                Launch Scanner →
+            </a>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="results-container" class="hidden space-y-6">
+            
+            <!-- Top Hero Overview Card -->
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" style="background: var(--stat-glow-indigo)"></div>
+
+                <div class="grid md:grid-cols-12 gap-6 items-center">
+                    
+                    <!-- Gauge & Score Summary -->
+                    <div class="md:col-span-4 flex flex-col items-center justify-center text-center p-4 border-b md:border-b-0 md:border-r border-[var(--card-border)]">
+                        <div class="relative score-ring mb-3">
+                            <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+                                <circle id="score-circle" cx="60" cy="60" r="50" fill="none" stroke="#34d399" stroke-width="10" stroke-linecap="round"
+                                    stroke-dasharray="314.16" stroke-dashoffset="314.16" class="transition-all duration-1000 ease-out"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="score-value" class="font-heading text-4xl font-extrabold text-[var(--text-main)]">0</span>
+                                <span class="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Score / 100</span>
+                            </div>
+                        </div>
+
+                        <div id="pass-fail-badge" class="px-4 py-1.5 rounded-full font-heading font-bold text-xs tracking-wider uppercase mb-1.5 shadow-sm">
+                            EVALUATING…
+                        </div>
+                        <p id="rules-summary" class="text-xs text-[var(--text-muted)] font-medium"></p>
+                    </div>
+
+                    <!-- Executive Audit Highlights -->
+                    <div class="md:col-span-8 space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <span class="text-[11px] font-semibold tracking-wider uppercase text-[var(--cyan-glow)] font-mono">Statutory Metrology Verification</span>
+                                <h1 id="product-title-header" class="font-heading text-xl sm:text-2xl font-bold text-[var(--text-main)] tracking-tight">
+                                    Packaged Commodity Findings
+                                </h1>
+                            </div>
+                            <div id="low-confidence-tag" class="hidden px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-500 rounded-md text-xs flex items-center gap-1.5 font-medium">
+                                <span>⚠ OCR-Only Fallback Active</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div class="glass-subtle rounded-xl p-3">
+                                <span class="text-[10px] text-[var(--text-muted)] block mb-0.5">Mandates Passed</span>
+                                <span id="stat-passed-count" class="font-heading text-lg font-bold text-emerald-500">0</span>
+                                <span class="text-[10px] text-[var(--text-muted)] opacity-75"> / 16 Rules</span>
+                            </div>
+                            <div class="glass-subtle rounded-xl p-3">
+                                <span class="text-[10px] text-[var(--text-muted)] block mb-0.5">Missing Declarations</span>
+                                <span id="stat-missing-count" class="font-heading text-lg font-bold text-rose-500">0</span>
+                                <span class="text-[10px] text-[var(--text-muted)] opacity-75"> Mandatory</span>
+                            </div>
+                            <div class="glass-subtle rounded-xl p-3">
+                                <span class="text-[10px] text-[var(--text-muted)] block mb-0.5">Format Inconsistencies</span>
+                                <span id="stat-format-count" class="font-heading text-lg font-bold text-amber-500">0</span>
+                                <span class="text-[10px] text-[var(--text-muted)] opacity-75"> Irregularities</span>
+                            </div>
+                            <div class="glass-subtle rounded-xl p-3">
+                                <span class="text-[10px] text-[var(--text-muted)] block mb-0.5">Audit Framework</span>
+                                <span class="font-heading text-xs font-bold text-[var(--cyan-glow)] block">LMPC 2011</span>
+                                <span class="text-[10px] text-[var(--text-muted)] opacity-75">Gazette G.S.R. 629</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Two-Column Workspace: Evidence Viewer (Left) & Field Inspector (Right) -->
+            <div class="grid lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Left: Physical Evidence Label Card -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="glass-panel rounded-3xl p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-heading font-bold text-sm text-[var(--text-main)] flex items-center gap-2">
+                                <svg class="w-4 h-4 text-[var(--cyan-glow)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                Inspected Package Label
+                            </h2>
+                            <span class="text-[10px] font-mono px-2 py-0.5 bg-[var(--input-bg)] text-[var(--text-muted)] rounded border border-[var(--card-border)]">Digital Evidence</span>
+                        </div>
+
+                        <div class="rounded-2xl overflow-hidden bg-[var(--input-bg)] border border-[var(--card-border)] p-2 flex items-center justify-center min-h-[280px]">
+                            <img id="result-image" class="w-full max-h-[380px] object-contain rounded-xl transition hover:scale-[1.02] duration-300" alt="Scanned commodity label">
+                        </div>
+
+                        <!-- Product Link Banner if scanned from URL -->
+                        <div id="product-link-banner" class="hidden mt-3 p-3 rounded-xl bg-[var(--input-bg)] border border-[var(--card-border)] flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2 truncate pr-2">
+                                <svg class="w-4 h-4 text-[var(--cyan-glow)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                <span id="product-link-text" class="text-[var(--text-muted)] truncate"></span>
+                            </div>
+                            <a id="product-link-anchor" href="#" target="_blank" rel="noopener noreferrer" class="shrink-0 text-[var(--cyan-glow)] hover:opacity-80 font-semibold flex items-center gap-1">
+                                Visit Listing ↗
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Finalize Inspection Action Box -->
+                    <div class="glass-panel rounded-3xl p-5 border border-[var(--card-border)]">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="font-heading font-bold text-sm text-[var(--text-main)]">Generate Legal Notice & Report</h2>
+                            <span class="text-[10px] text-[var(--text-muted)] font-medium">Step 2 / Official Filing</span>
+                        </div>
+
+                        <div class="space-y-3 mb-4">
+                            <div>
+                                <label class="text-[11px] text-[var(--text-muted)] block mb-1">Inspector / Officer Name</label>
+                                <input type="text" id="officer-name" value="Legal Metrology Officer" class="custom-input w-full rounded-xl px-3.5 py-2 text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-[var(--text-muted)] block mb-1">Product Description / Commodity Name</label>
+                                <input type="text" id="product-name" placeholder="e.g. Parle-G Gluco Biscuits 500g" class="custom-input w-full rounded-xl px-3.5 py-2 text-xs">
+                            </div>
+                        </div>
+
+                        <button id="finalize-btn" class="gradient-btn w-full py-3 rounded-xl text-white font-heading font-semibold text-xs tracking-wide flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <span id="fin-text">Finalize & Generate Metrology Case File</span>
+                            <span id="fin-loading" class="hidden flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Compiling Case File…</span>
+                        </button>
+
+                        <!-- Download Links Area -->
+                        <div id="download-section" class="hidden mt-4 pt-4 border-t border-[var(--card-border)] space-y-2.5">
+                            <div class="flex items-center gap-2 text-emerald-500 text-xs font-semibold mb-2">
+                                <span>✓ Inspection Case File Successfully Compiled!</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a id="pdf-link" href="#" target="_blank" class="download-btn bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 border border-rose-500/30 rounded-xl py-2.5 px-3 text-center text-xs font-semibold flex items-center justify-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    PDF Notice
+                                </a>
+                                <a id="docx-link" href="#" target="_blank" class="download-btn bg-blue-500/20 hover:bg-blue-500/30 text-[var(--cyan-glow)] border border-blue-500/30 rounded-xl py-2.5 px-3 text-center text-xs font-semibold flex items-center justify-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    DOCX File
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right: Extracted Declarations & Rule Violations -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <!-- Extracted Fields -->
+                    <div class="glass-panel rounded-3xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="font-heading font-bold text-base text-[var(--text-main)]">Extracted Mandatory Declarations</h2>
+                                <p class="text-xs text-[var(--text-muted)]">Values extracted by Vision AI and OCR. Officers can correct any field before filing.</p>
+                            </div>
+                            <span class="text-[10px] font-semibold text-[var(--cyan-glow)] bg-cyan-500/10 border border-[var(--card-border)] px-2 py-1 rounded font-mono">Interactive Editor</span>
+                        </div>
+
+                        <div id="fields-grid" class="grid sm:grid-cols-2 gap-3.5"></div>
+                    </div>
+
+                    <!-- Violations & Infringement Details -->
+                    <div id="violations-section" class="glass-panel rounded-3xl p-6 hidden border-rose-500/30">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                            <h2 class="font-heading font-bold text-base text-rose-400">Statutory Non-Compliance / Violations</h2>
+                        </div>
+                        <div id="violations-list" class="space-y-2.5"></div>
+                    </div>
+
+                    <!-- Passed Statutory Checks -->
+                    <div id="passed-section" class="glass-panel rounded-3xl p-6 hidden border-emerald-500/30">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            <h2 class="font-heading font-bold text-base text-emerald-500">Verified Compliant Declarations</h2>
+                        </div>
+                        <div id="passed-list" class="space-y-2"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-7xl mx-auto mt-8 text-center text-[var(--text-muted)] text-xs relative z-10">
+        <p>LabelSure™ AI Metrology Suite • Department of Consumer Affairs • Government of India Standards</p>
+    </footer>
+
+    <!-- OCR & GUIDELINE VERIFICATION BACKGROUND ENGINE -->
+    <script>
+        let isLightMode = false;
+
+        // Theme Switch Handler
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+        const themeToggleText = document.getElementById("themeToggleText");
+
+        themeToggleBtn.addEventListener("click", () => {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle("light-theme", isLightMode);
+            themeToggleIcon.textContent = isLightMode ? "🌙" : "☀️";
+            themeToggleText.textContent = isLightMode ? "Dark Mode" : "Light Mode";
+        });
+
+        (function () {
+            const canvas = document.getElementById("ocr-stream-canvas");
+            const ctx = canvas.getContext("2d");
+            let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+            const mouse = { x: -1000, y: -1000, active: false };
+            window.addEventListener("mousemove", (e) => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+                mouse.active = true;
+            });
+            window.addEventListener("mouseleave", () => {
+                mouse.active = false;
+            });
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + "px";
+                canvas.style.height = height + "px";
+                ctx.scale(dpr, dpr);
+            }
+            window.addEventListener("resize", resize);
+            resize();
+
+            const LABEL_TOKENS = [
+                "NET QTY 500g",
+                "MRP ₹280.00",
+                "USP: ₹0.56/g",
+                "RULE 6(1)(a) PASS",
+                "BATCH: L-2026",
+                "PKD: 08/2026",
+                "EXP: 12 MONTHS",
+                "MFG LIC #1001",
+                "PDP: 4.2mm HGT",
+                "ORIGIN: INDIA",
+                "SCHED-V COMPLIANT",
+                "E211 PRESERVATIVE",
+                "ALLERGEN: SOY",
+                "FSSAI 100140"
+            ];
+
+            const TOTAL_NODES = 55;
+
+            class LabelScanNode {
+                constructor() {
+                    this.init(true);
+                }
+
+                init(randomY = false) {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : height + Math.random() * 40;
+                    this.text = LABEL_TOKENS[Math.floor(Math.random() * LABEL_TOKENS.length)];
+                    this.type = Math.random() > 0.45 ? "TOKEN" : "RETICLE";
+                    
+                    this.alpha = Math.random() * 0.5 + 0.15;
+                    this.fadeSpeed = (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1);
+                    
+                    this.vx = (Math.random() - 0.5) * 0.25;
+                    this.vy = -(Math.random() * 0.35 + 0.15);
+                    
+                    this.boxSize = Math.random() * 14 + 16;
+                    this.fontSize = Math.floor(Math.random() * 2) + 10;
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha += this.fadeSpeed;
+
+                    if (this.alpha >= 0.75) {
+                        this.alpha = 0.75;
+                        this.fadeSpeed = -Math.abs(this.fadeSpeed);
+                    } else if (this.alpha <= 0.08) {
+                        this.fadeSpeed = Math.abs(this.fadeSpeed);
+                    }
+
+                    if (this.y < -40 || this.x < -40 || this.x > width + 40) {
+                        this.init(false);
+                    }
+                }
+
+                draw() {
+                    const dx = this.x - mouse.x;
+                    const dy = this.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const isHovered = mouse.active && dist < 140;
+                    
+                    const currentAlpha = isHovered ? Math.min(1, this.alpha + 0.4) : this.alpha;
+                    const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+                    const dotRgb = isLightMode ? "4, 120, 87" : "52, 211, 153";
+
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+
+                    if (this.type === "TOKEN") {
+                        ctx.font = `600 ${this.fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+                        ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.95})`;
+                        ctx.fillText(this.text, 0, 0);
+
+                        ctx.beginPath();
+                        ctx.arc(-6, -3, 1.5, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${dotRgb}, ${currentAlpha})`;
+                        ctx.fill();
+                    } else {
+                        const s = this.boxSize;
+                        const arm = 5;
+                        ctx.strokeStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.85})`;
+                        ctx.lineWidth = 1;
+
+                        ctx.beginPath();
+                        ctx.moveTo(-s, -s + arm); ctx.lineTo(-s, -s); ctx.lineTo(-s + arm, -s);
+                        ctx.moveTo(s - arm, -s); ctx.lineTo(s, -s); ctx.lineTo(s, -s + arm);
+                        ctx.moveTo(-s, s - arm); ctx.lineTo(-s, s); ctx.lineTo(-s + arm, s);
+                        ctx.moveTo(s - arm, s); ctx.lineTo(s, s); ctx.lineTo(s, s - arm);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 1.2, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha})`;
+                        ctx.fill();
+                    }
+
+                    ctx.restore();
+
+                    if (isHovered) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - dist / 140) * 0.4})`;
+                        ctx.lineWidth = 0.9;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            const nodes = Array.from({ length: TOTAL_NODES }, () => new LabelScanNode());
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const dx = nodes[i].x - nodes[j].x;
+                        const dy = nodes[i].y - nodes[j].y;
+                        const d = Math.sqrt(dx * dx + dy * dy);
+                        if (d < 95) {
+                            ctx.beginPath();
+                            ctx.moveTo(nodes[i].x, nodes[i].y);
+                            ctx.lineTo(nodes[j].x, nodes[j].y);
+                            ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - d / 95) * 0.12})`;
+                            ctx.lineWidth = 0.7;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                for (let i = 0; i < nodes.length; i++) {
+                    nodes[i].update();
+                    nodes[i].draw();
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        })();
+
+        /* Core Functionality & Rendering */
+        const API = window.location.origin;
+        let scanData = null;
+
+        const FIELD_CONFIG = {
+            mrp: { label: 'Maximum Retail Price (MRP)', rule: 'Rule 6(1)(d)', placeholder: 'e.g. Rs. 120.00' },
+            net_quantity: { label: 'Net Quantity', rule: 'Rule 6(1)(b)', placeholder: 'e.g. 500g or 1 L' },
+            unit: { label: 'Standard Measurement Unit', rule: 'Rule 6(1)(b) Table I', placeholder: 'e.g. g, kg, ml, L' },
+            manufacturer_name: { label: 'Manufacturer / Packer Name', rule: 'Rule 6(1)(a)', placeholder: 'Company or Brand name' },
+            manufacturer_address: { label: 'Complete Physical Address', rule: 'Rule 6(1)(a)', placeholder: 'Full address with PIN / Country' },
+            country_of_origin: { label: 'Country of Origin', rule: 'Rule 6(1)(f)', placeholder: 'e.g. India or USA' },
+            consumer_care: { label: 'Consumer Care Contacts', rule: 'Rule 6(1)(e)', placeholder: 'Phone, Email or Helpline' },
+            manufacture_date: { label: 'Month & Year of Mfg/Import', rule: 'Rule 6(1)(c)', placeholder: 'e.g. 08/2024' },
+            best_before_expiry: { label: 'Best Before / Expiry Period', rule: 'Rule 6(1)(g)', placeholder: 'e.g. 12 months from Mfg' },
+            batch_no: { label: 'Batch / Lot / Code Number', rule: 'Rule 6(2)', placeholder: 'e.g. B2024-0891' },
+        };
+
+        function init() {
+            const raw = sessionStorage.getItem('scan_result');
+            if (!raw) {
+                document.getElementById('no-data').classList.remove('hidden');
+                return;
+            }
+            scanData = JSON.parse(raw);
+            document.getElementById('results-container').classList.remove('hidden');
+            renderResults();
+        }
+
+        function renderResults() {
+            document.getElementById('scan-id-text').textContent = scanData.scan_id || 'DEMO-001';
+            document.getElementById('result-image').src = API + scanData.image_url;
+
+            if (scanData.product_name) {
+                document.getElementById('product-title-header').textContent = scanData.product_name;
+                document.getElementById('product-name').value = scanData.product_name;
+            }
+
+            if (scanData.low_confidence) {
+                document.getElementById('low-confidence-tag').classList.remove('hidden');
+            }
+
+            if (scanData.product_link && scanData.product_link.trim()) {
+                const banner = document.getElementById('product-link-banner');
+                banner.classList.remove('hidden');
+                document.getElementById('product-link-text').textContent = scanData.product_link;
+                document.getElementById('product-link-anchor').href = scanData.product_link;
+            }
+
+            const score = scanData.score || 0;
+            const circle = document.getElementById('score-circle');
+            const circumference = 2 * Math.PI * 50;
+            const offset = circumference - (score / 100) * circumference;
+
+            let color = '#34d399';
+            if (score < 50) color = '#f43f5e';
+            else if (score < 70) color = '#f59e0b';
+
+            setTimeout(() => {
+                circle.style.stroke = color;
+                circle.style.strokeDashoffset = offset;
+            }, 100);
+
+            document.getElementById('score-value').textContent = score;
+
+            const badge = document.getElementById('pass-fail-badge');
+            if (scanData.pass_fail === 'PASS') {
+                badge.className = 'px-4 py-1.5 rounded-full font-heading font-bold text-xs tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                badge.textContent = '✓ LMPC COMPLIANT';
+            } else {
+                badge.className = 'px-4 py-1.5 rounded-full font-heading font-bold text-xs tracking-wider uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30';
+                badge.textContent = '✗ NON-COMPLIANT';
+            }
+
+            const passedCount = scanData.passed_rules ? scanData.passed_rules.length : 0;
+            const missingCount = scanData.violations ? scanData.violations.filter(v => v.reason && (v.reason.includes('missing') || v.reason.includes('empty'))).length : 0;
+            const formatCount = scanData.violations ? (scanData.violations.length - missingCount) : 0;
+
+            document.getElementById('stat-passed-count').textContent = passedCount;
+            document.getElementById('stat-missing-count').textContent = missingCount;
+            document.getElementById('stat-format-count').textContent = formatCount;
+            document.getElementById('rules-summary').textContent = `${passedCount} statutory rules verified • ${missingCount + formatCount} infringements`;
+
+            const fieldsGrid = document.getElementById('fields-grid');
+            fieldsGrid.innerHTML = '';
+
+            const fields = scanData.extracted_fields || {};
+            for (const [key, cfg] of Object.entries(FIELD_CONFIG)) {
+                const item = fields[key] || {};
+                const value = typeof item === 'object' && item !== null ? (item.value || '') : (item || '');
+                const source = (typeof item === 'object' && item !== null ? item.source : 'none') || 'none';
+
+                let pillClass = 'source-pill-none';
+                let pillText = 'Missing';
+                if (source === 'both') { pillClass = 'source-pill-both'; pillText = 'Verified (Vision+OCR)'; }
+                else if (source === 'groq') { pillClass = 'source-pill-groq'; pillText = 'Vision AI'; }
+                else if (source === 'ocr') { pillClass = 'source-pill-ocr'; pillText = 'OCR Text'; }
+
+                const el = document.createElement('div');
+                el.className = 'field-card glass-subtle rounded-2xl p-3.5 flex flex-col justify-between';
+                el.innerHTML = `
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[11px] font-semibold text-[var(--text-main)]">${cfg.label}</span>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-semibold font-mono ${pillClass}">${pillText}</span>
+                    </div>
+                    <input type="text" data-field="${key}" value="${escapeHtml(value)}" placeholder="${cfg.placeholder}"
+                        class="custom-input w-full rounded-lg px-3 py-1.5 text-xs font-mono">
+                    <span class="text-[10px] text-[var(--text-muted)] mt-1.5">${cfg.rule}</span>
+                `;
+                fieldsGrid.appendChild(el);
+            }
+
+            const violationsList = document.getElementById('violations-list');
+            violationsList.innerHTML = '';
+            const violations = scanData.violations || [];
+
+            if (violations.length > 0) {
+                document.getElementById('violations-section').classList.remove('hidden');
+                for (const v of violations) {
+                    const vel = document.createElement('div');
+                    vel.className = 'p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs flex items-start gap-2.5';
+                    vel.innerHTML = `
+                        <div class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 font-mono text-[10px] font-bold shrink-0 mt-0.5">${v.rule_number || 'Rule 6'}</div>
+                        <div class="flex-1">
+                            <span class="text-rose-400 font-semibold block mb-0.5">${v.field ? v.field.replace('_', ' ').toUpperCase() : 'MANDATORY FIELD'}</span>
+                            <p class="text-rose-400/90">${escapeHtml(v.reason || v.rule_text)}</p>
+                        </div>
+                    `;
+                    violationsList.appendChild(vel);
+                }
+            } else {
+                document.getElementById('violations-section').classList.add('hidden');
+            }
+
+            const passedList = document.getElementById('passed-list');
+            passedList.innerHTML = '';
+            const passed = scanData.passed_rules || [];
+
+            if (passed.length > 0) {
+                document.getElementById('passed-section').classList.remove('hidden');
+                for (const p of passed) {
+                    const pel = document.createElement('div');
+                    pel.className = 'p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs flex items-center justify-between';
+                    pel.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span class="text-emerald-500 font-bold">✓</span>
+                            <span class="font-mono text-[10px] text-emerald-500 px-1.5 py-0.5 rounded bg-emerald-500/20 font-semibold">${p.rule_number}</span>
+                            <span class="text-[var(--text-main)] text-[11px]">${escapeHtml(p.field || '')}</span>
+                        </div>
+                        <span class="text-[10px] text-[var(--text-muted)] truncate max-w-xs">${escapeHtml(p.reason || 'Compliant')}</span>
+                    `;
+                    passedList.appendChild(pel);
+                }
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        document.getElementById('finalize-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('finalize-btn');
+            btn.disabled = true;
+            document.getElementById('fin-text').classList.add('hidden');
+            document.getElementById('fin-loading').classList.remove('hidden');
+
+            const corrected = {};
+            document.querySelectorAll('#fields-grid input[data-field]').forEach(input => {
+                corrected[input.getAttribute('data-field')] = input.value.trim();
+            });
+
+            const payload = {
+                scan_id: scanData.scan_id,
+                user_email: sessionStorage.getItem('user_email') || '',
+                corrected_fields: corrected,
+                officer_name: document.getElementById('officer-name').value || 'Legal Metrology Officer',
+                product_name: document.getElementById('product-name').value || 'Packaged Commodity',
+                image_url: scanData.image_url,
+                estimated_font_height_mm: scanData.estimated_font_height_mm,
+                ocr_raw_text: scanData._ocr_raw_text || '',
+                low_confidence: scanData.low_confidence || false,
+            };
+
+            try {
+                const res = await fetch(`${API}/finalize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const result = await res.json();
+
+                if (!res.ok) {
+                    alert('Error finalizing report: ' + (result.detail || 'Server error'));
+                    return;
+                }
+
+                document.getElementById('pdf-link').href = result.pdf_url;
+                document.getElementById('docx-link').href = result.docx_url;
+                document.getElementById('download-section').classList.remove('hidden');
+
+                scanData.score = result.score;
+                scanData.pass_fail = result.pass_fail;
+                scanData.violations = result.violations;
+                renderResults();
+
+                document.getElementById('download-section').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (err) {
+                alert('Network error finalizing report.');
+            } finally {
+                btn.disabled = false;
+                document.getElementById('fin-text').classList.remove('hidden');
+                document.getElementById('fin-loading').classList.add('hidden');
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

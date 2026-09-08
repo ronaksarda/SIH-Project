@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabelSure AI — Officer Enforcement Gateway</title>
+    <meta name="description" content="Official Legal Metrology Packaged Commodities (LMPC 2011) AI Inspection Portal">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #020617;
+            --card-bg: rgba(10, 18, 38, 0.88);
+            --card-border: rgba(56, 189, 248, 0.22);
+            --card-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85), 0 0 45px -5px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            --cyan-glow: #38bdf8;
+            --blue-accent: #2563eb;
+            --emerald-accent: #34d399;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --heading-gradient: linear-gradient(180deg, #ffffff 40%, #94a3b8 100%);
+            --input-bg: rgba(4, 9, 22, 0.75);
+            --input-border: rgba(56, 189, 248, 0.25);
+            --input-focus-border: #38bdf8;
+            --input-focus-shadow: rgba(56, 189, 248, 0.2);
+            --input-text: #f8fafc;
+            --input-placeholder: #64748b;
+            --toggle-bg: rgba(15, 23, 42, 0.8);
+            --toggle-border: rgba(56, 189, 248, 0.3);
+            --toggle-text: #38bdf8;
+            --divider-color: rgba(56, 189, 248, 0.15);
+            --demo-btn-bg: rgba(245, 158, 11, 0.12);
+            --demo-btn-border: rgba(245, 158, 11, 0.35);
+            --demo-btn-text: #fbbf24;
+            --demo-btn-hover-bg: rgba(245, 158, 11, 0.22);
+            --demo-badge-bg: rgba(245, 158, 11, 0.25);
+            --demo-badge-text: #fde68a;
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(30, 58, 138, 0.75) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(14, 116, 144, 0.4) 0%, transparent 65%),
+                          linear-gradient(180deg, #050d26 0%, #030712 60%, #02040a 100%);
+            --grid-line-color: rgba(56, 189, 248, 0.04);
+        }
+
+        body.light-theme {
+            --bg-color: #cbdcf7;
+            --card-bg: rgba(255, 255, 255, 0.94);
+            --card-border: rgba(96, 165, 250, 0.45);
+            --card-shadow: 0 24px 45px -15px rgba(29, 78, 216, 0.16), 0 0 35px -5px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+            --cyan-glow: #0284c7;
+            --blue-accent: #1d4ed8;
+            --emerald-accent: #059669;
+            --text-main: #0f172a;
+            --text-muted: #334155;
+            --heading-gradient: linear-gradient(180deg, #0f172a 30%, #1e3a8a 100%);
+            --input-bg: rgba(241, 245, 254, 0.95);
+            --input-border: rgba(96, 165, 250, 0.55);
+            --input-focus-border: #1d4ed8;
+            --input-focus-shadow: rgba(29, 78, 216, 0.2);
+            --input-text: #0f172a;
+            --input-placeholder: #94a3b8;
+            --toggle-bg: #ffffff;
+            --toggle-border: #93c5fd;
+            --toggle-text: #1d4ed8;
+            --divider-color: rgba(96, 165, 250, 0.35);
+            --demo-btn-bg: rgba(245, 158, 11, 0.14);
+            --demo-btn-border: rgba(217, 119, 6, 0.4);
+            --demo-btn-text: #b45309;
+            --demo-btn-hover-bg: rgba(245, 158, 11, 0.24);
+            --demo-badge-bg: rgba(245, 158, 11, 0.3);
+            --demo-badge-text: #92400e;
+            --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(96, 165, 250, 0.75) 0%, transparent 70%),
+                          radial-gradient(circle 800px at 15% 10%, rgba(56, 189, 248, 0.65) 0%, transparent 65%),
+                          linear-gradient(180deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%);
+            --grid-line-color: rgba(30, 64, 175, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-feature-settings: "tnum" on, "zero" on;
+        }
+
+        /* 1. Ambient Background Atmosphere */
+        .bg-canvas-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glows {
+            position: absolute;
+            inset: 0;
+            background: var(--ambient-bg);
+            filter: blur(40px);
+            transition: background 0.3s ease;
+        }
+
+        .grid-lines {
+            position: absolute;
+            inset: 0;
+            background-size: 44px 44px;
+            background-image: 
+                linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+            mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+        }
+
+        #ocr-stream-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Theme Switch Button */
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--toggle-text);
+            background: var(--toggle-bg);
+            border: 1px solid var(--toggle-border);
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px;
+            border-radius: 9999px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--card-border);
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--cyan-glow);
+            letter-spacing: 0.05em;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--cyan-glow);
+            box-shadow: 0 0 8px var(--cyan-glow);
+            animation: pulseDot 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.8); }
+        }
+
+        /* Glassmorphism Auth Card */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .heading-gradient-text {
+            background: var(--heading-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Inputs */
+        .themed-input {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--input-text);
+            transition: all 0.2s ease;
+        }
+
+        .themed-input::placeholder {
+            color: var(--input-placeholder);
+        }
+
+        .themed-input:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+
+        /* Action Buttons */
+        .btn-enforce {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #1d4ed8 100%);
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .btn-enforce:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px 0 rgba(56, 189, 248, 0.5);
+            filter: brightness(1.08);
+        }
+
+        .demo-bypass-btn {
+            background: var(--demo-btn-bg);
+            border: 1px solid var(--demo-btn-border);
+            color: var(--demo-btn-text);
+            transition: all 0.2s ease;
+        }
+
+        .demo-bypass-btn:hover {
+            background: var(--demo-btn-hover-bg);
+            transform: translateY(-1px);
+        }
+
+        .demo-badge {
+            background: var(--demo-badge-bg);
+            color: var(--demo-badge-text);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 antialiased selection:bg-cyan-500/25 selection:text-cyan-200">
+
+    <!-- Theme Toggle Button -->
+    <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Toggle visual theme">
+        <span id="themeToggleIcon">☀️</span>
+        <span id="themeToggleText">Light Mode</span>
+    </button>
+
+    <!-- Dynamic Label OCR Reading & Guideline Particle Grid -->
+    <div class="bg-canvas-container">
+        <div class="ambient-glows"></div>
+        <div class="grid-lines"></div>
+        <canvas id="ocr-stream-canvas"></canvas>
+    </div>
+
+    <!-- Header / Government Badge -->
+    <header class="w-full max-w-md mx-auto text-center pt-4 relative z-10">
+        <div class="status-badge mb-3">
+            <span class="status-dot"></span>
+            <span>GOVERNMENT OF INDIA &bull; ENFORCEMENT NODE</span>
+        </div>
+        <p class="text-xs font-medium text-[var(--text-muted)]">Directorate of Legal Metrology &bull; LMPC 2011 AI Inspection System</p>
+    </header>
+
+    <!-- Main Auth Card -->
+    <main class="w-full max-w-md mx-auto my-auto py-6 relative z-10">
+        <div class="glass-card p-7 sm:p-9 relative overflow-hidden">
+            
+            <!-- Header Identity with Scale Icon -->
+            <div class="flex items-center gap-3.5 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-[#040816] border border-cyan-500/30 p-2 flex items-center justify-center flex-shrink-0 shadow-lg shadow-cyan-950/40">
+                    <svg viewBox="0 0 24 24" class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17M9 20h6" />
+                        <circle cx="12" cy="5" r="1.5" fill="currentColor" />
+                        <path stroke-linecap="round" d="M4 8h16" />
+                        <path stroke-linecap="round" d="M4 8l-2 5m4-5l-2 5M2 13h4c0 1.2-1 2-2 2s-2-.8-2-2z" />
+                        <path stroke-linecap="round" d="M20 8l-2 5m4-5l-2 5M18 13h4c0 1.2-1 2-2 2s-2-.8-2-2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tight heading-gradient-text">LabelSure™ AI</h1>
+                    <p class="text-xs font-mono font-semibold text-[var(--cyan-glow)]">OFFICER TERMINAL V2.4</p>
+                </div>
+            </div>
+
+            <!-- Fast Demo Access Button for Judges -->
+            <div class="mb-6">
+                <button type="button" id="demo-login-btn" class="demo-bypass-btn w-full py-2.5 px-4 rounded-xl flex items-center justify-between text-xs font-semibold group">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm">⚡</span>
+                        <span>Hackathon Judge Fast Access</span>
+                    </div>
+                    <span class="demo-badge text-[10px] px-2 py-0.5 rounded transition font-mono font-bold">1-CLICK LOGIN →</span>
+                </button>
+            </div>
+
+            <!-- Section Divider -->
+            <div class="relative flex py-2 items-center mb-6">
+                <div class="flex-grow border-t border-[var(--divider-color)]"></div>
+                <span class="flex-shrink mx-3 text-[10px] text-[var(--text-muted)] uppercase font-mono tracking-wider">Or Officer Credentials</span>
+                <div class="flex-grow border-t border-[var(--divider-color)]"></div>
+            </div>
+
+            <!-- Form -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-[var(--text-main)] mb-1.5" for="email">
+                        Official ID / Email
+                    </label>
+                    <input type="email" id="email" required placeholder="officer.verma@lm.gov.in"
+                        class="themed-input w-full px-4 py-2.5 rounded-xl text-xs font-mono">
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-semibold text-[var(--text-main)]" for="password">
+                            Authentication Key
+                        </label>
+                        <span class="text-[10px] text-[var(--text-muted)] font-mono font-semibold">LMPC-PIN</span>
+                    </div>
+                    <input type="password" id="password" required placeholder="••••••••••••"
+                        class="themed-input w-full px-4 py-2.5 rounded-xl text-xs font-mono">
+                </div>
+
+                <!-- Error Toast -->
+                <div id="error-box" class="hidden rounded-xl bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-400 flex items-center gap-2 font-mono">
+                    <svg class="w-4 h-4 text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span id="error-text">Authentication failed</span>
+                </div>
+
+                <!-- Success Toast -->
+                <div id="success-box" class="hidden rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-xs text-emerald-400 flex items-center gap-2 font-mono">
+                    <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span>Credentials verified. Redirecting to Command Center…</span>
+                </div>
+
+                <button type="submit" id="login-btn" class="btn-enforce w-full py-3 rounded-xl text-xs font-bold tracking-wide uppercase flex items-center justify-center gap-2 mt-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                    <span>Sign In to Terminal</span>
+                </button>
+            </form>
+
+            <div class="mt-6 pt-5 border-t border-[var(--divider-color)] text-center">
+                <a href="/" class="text-xs font-semibold text-[var(--cyan-glow)] hover:opacity-80 inline-flex items-center gap-1.5 transition">
+                    <span>Direct Scanner Access without sign-in</span>
+                    <span class="font-mono">→</span>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-md mx-auto text-center pb-4 relative z-10">
+        <p class="text-[10px] text-[var(--text-muted)] font-mono font-medium">
+            SECURE RESTRICTED ACCESS &bull; 256-BIT ENCRYPTION &bull; SECTION 36 & 49 LMPC ACT 2011
+        </p>
+    </footer>
+
+    <!-- OCR & GUIDELINE VERIFICATION BACKGROUND ENGINE (Identical to Scanner) -->
+    <script>
+        let isLightMode = false;
+
+        // Theme Switch Handler
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+        const themeToggleText = document.getElementById("themeToggleText");
+
+        themeToggleBtn.addEventListener("click", () => {
+            isLightMode = !isLightMode;
+            document.body.classList.toggle("light-theme", isLightMode);
+            themeToggleIcon.textContent = isLightMode ? "🌙" : "☀️";
+            themeToggleText.textContent = isLightMode ? "Dark Mode" : "Light Mode";
+        });
+
+        (function () {
+            const canvas = document.getElementById("ocr-stream-canvas");
+            const ctx = canvas.getContext("2d");
+            let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+            const mouse = { x: -1000, y: -1000, active: false };
+            window.addEventListener("mousemove", (e) => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+                mouse.active = true;
+            });
+            window.addEventListener("mouseleave", () => {
+                mouse.active = false;
+            });
+
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+                canvas.style.width = width + "px";
+                canvas.style.height = height + "px";
+                ctx.scale(dpr, dpr);
+            }
+            window.addEventListener("resize", resize);
+            resize();
+
+            const LABEL_TOKENS = [
+                "NET QTY 500g",
+                "MRP ₹280.00",
+                "USP: ₹0.56/g",
+                "RULE 6(1)(a) PASS",
+                "BATCH: L-2026",
+                "PKD: 08/2026",
+                "EXP: 12 MONTHS",
+                "MFG LIC #1001",
+                "PDP: 4.2mm HGT",
+                "ORIGIN: INDIA",
+                "SCHED-V COMPLIANT",
+                "E211 PRESERVATIVE",
+                "ALLERGEN: SOY",
+                "FSSAI 100140"
+            ];
+
+            const TOTAL_NODES = 55;
+
+            class LabelScanNode {
+                constructor() {
+                    this.init(true);
+                }
+
+                init(randomY = false) {
+                    this.x = Math.random() * width;
+                    this.y = randomY ? Math.random() * height : height + Math.random() * 40;
+                    this.text = LABEL_TOKENS[Math.floor(Math.random() * LABEL_TOKENS.length)];
+                    this.type = Math.random() > 0.45 ? "TOKEN" : "RETICLE";
+                    
+                    this.alpha = Math.random() * 0.5 + 0.15;
+                    this.fadeSpeed = (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1);
+                    
+                    this.vx = (Math.random() - 0.5) * 0.25;
+                    this.vy = -(Math.random() * 0.35 + 0.15);
+                    
+                    this.boxSize = Math.random() * 14 + 16;
+                    this.fontSize = Math.floor(Math.random() * 2) + 10;
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.alpha += this.fadeSpeed;
+
+                    if (this.alpha >= 0.75) {
+                        this.alpha = 0.75;
+                        this.fadeSpeed = -Math.abs(this.fadeSpeed);
+                    } else if (this.alpha <= 0.08) {
+                        this.fadeSpeed = Math.abs(this.fadeSpeed);
+                    }
+
+                    if (this.y < -40 || this.x < -40 || this.x > width + 40) {
+                        this.init(false);
+                    }
+                }
+
+                draw() {
+                    const dx = this.x - mouse.x;
+                    const dy = this.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const isHovered = mouse.active && dist < 140;
+                    
+                    const currentAlpha = isHovered ? Math.min(1, this.alpha + 0.4) : this.alpha;
+                    const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+                    const dotRgb = isLightMode ? "4, 120, 87" : "52, 211, 153";
+
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+
+                    if (this.type === "TOKEN") {
+                        ctx.font = `600 ${this.fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+                        ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.95})`;
+                        ctx.fillText(this.text, 0, 0);
+
+                        ctx.beginPath();
+                        ctx.arc(-6, -3, 1.5, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${dotRgb}, ${currentAlpha})`;
+                        ctx.fill();
+                    } else {
+                        const s = this.boxSize;
+                        const arm = 5;
+                        ctx.strokeStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.85})`;
+                        ctx.lineWidth = 1;
+
+                        ctx.beginPath();
+                        ctx.moveTo(-s, -s + arm); ctx.lineTo(-s, -s); ctx.lineTo(-s + arm, -s);
+                        ctx.moveTo(s - arm, -s); ctx.lineTo(s, -s); ctx.lineTo(s, -s + arm);
+                        ctx.moveTo(-s, s - arm); ctx.lineTo(-s, s); ctx.lineTo(-s + arm, s);
+                        ctx.moveTo(s - arm, s); ctx.lineTo(s, s); ctx.lineTo(s, s - arm);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.arc(0, 0, 1.2, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha})`;
+                        ctx.fill();
+                    }
+
+                    ctx.restore();
+
+                    if (isHovered) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - dist / 140) * 0.4})`;
+                        ctx.lineWidth = 0.9;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            const nodes = Array.from({ length: TOTAL_NODES }, () => new LabelScanNode());
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const dx = nodes[i].x - nodes[j].x;
+                        const dy = nodes[i].y - nodes[j].y;
+                        const d = Math.sqrt(dx * dx + dy * dy);
+                        if (d < 95) {
+                            ctx.beginPath();
+                            ctx.moveTo(nodes[i].x, nodes[i].y);
+                            ctx.lineTo(nodes[j].x, nodes[j].y);
+                            ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - d / 95) * 0.12})`;
+                            ctx.lineWidth = 0.7;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                for (let i = 0; i < nodes.length; i++) {
+                    nodes[i].update();
+                    nodes[i].draw();
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        })();
+
+        /* Auth Logic */
+        const SUPABASE_URL = localStorage.getItem('SUPABASE_URL') || '';
+        const SUPABASE_KEY = localStorage.getItem('SUPABASE_KEY') || '';
+
+        let supabaseClient = null;
+        if (SUPABASE_URL && SUPABASE_KEY) {
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } catch (e) {
+                console.warn('Supabase init skipped:', e);
+            }
+        }
+
+        document.getElementById('demo-login-btn').addEventListener('click', () => {
+            document.getElementById('email').value = 'officer.verma@lm.gov.in';
+            document.getElementById('password').value = 'sih2026winner';
+            
+            const successBox = document.getElementById('success-box');
+            successBox.classList.remove('hidden');
+            
+            sessionStorage.setItem('user_email', 'officer.verma@lm.gov.in');
+            sessionStorage.setItem('is_authenticated', 'true');
+
+            setTimeout(() => {
+                window.location.href = '/static/dashboard.html';
+            }, 550);
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorBox = document.getElementById('error-box');
+            const errorText = document.getElementById('error-text');
+            const successBox = document.getElementById('success-box');
+
+            errorBox.classList.add('hidden');
+            successBox.classList.add('hidden');
+
+            if (!supabaseClient) {
+                sessionStorage.setItem('user_email', email);
+                sessionStorage.setItem('is_authenticated', 'true');
+                successBox.classList.remove('hidden');
+                setTimeout(() => {
+                    window.location.href = '/static/dashboard.html';
+                }, 400);
+                return;
+            }
+
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.innerHTML = 'Verifying Credentials…';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    errorText.textContent = error.message;
+                    errorBox.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg><span>Sign In to Terminal</span>';
+                    return;
+                }
+
+                sessionStorage.setItem('user_email', email);
+                sessionStorage.setItem('is_authenticated', 'true');
+                successBox.classList.remove('hidden');
+                setTimeout(() => {
+                    window.location.href = '/static/dashboard.html';
+                }, 400);
+            } catch (err) {
+                errorText.textContent = err.message || 'Connection timeout';
+                errorBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg><span>Sign In to Terminal</span>';
+            }
+        });
+    </script>
+</body>
+</html>

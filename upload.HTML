@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Label Scanner — Metrology Vision Grid</title>
+  <style>
+    :root {
+      --bg-color: #020617;
+      --card-bg: rgba(10, 18, 38, 0.88);
+      --card-border: rgba(56, 189, 248, 0.22);
+      --card-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.85), 0 0 45px -5px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      --cyan-glow: #38bdf8;
+      --blue-accent: #2563eb;
+      --emerald-accent: #34d399;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --heading-gradient: linear-gradient(180deg, #ffffff 40%, #94a3b8 100%);
+      --dropzone-bg: rgba(4, 9, 22, 0.55);
+      --dropzone-border: rgba(56, 189, 248, 0.28);
+      --dropzone-hover-bg: rgba(56, 189, 248, 0.06);
+      --chip-bg: rgba(255, 255, 255, 0.05);
+      --chip-border: rgba(255, 255, 255, 0.12);
+      --chip-text: #cbd5e1;
+      --toggle-bg: rgba(15, 23, 42, 0.8);
+      --toggle-border: rgba(56, 189, 248, 0.3);
+      --toggle-text: #38bdf8;
+      --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(30, 58, 138, 0.75) 0%, transparent 70%),
+                        radial-gradient(circle 800px at 15% 10%, rgba(14, 116, 144, 0.4) 0%, transparent 65%),
+                        linear-gradient(180deg, #050d26 0%, #030712 60%, #02040a 100%);
+      --grid-line-color: rgba(56, 189, 248, 0.04);
+    }
+
+    body.light-theme {
+      --bg-color: #cbdcf7;
+      --card-bg: rgba(255, 255, 255, 0.94);
+      --card-border: rgba(96, 165, 250, 0.45);
+      --card-shadow: 0 24px 45px -15px rgba(29, 78, 216, 0.16), 0 0 35px -5px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
+      --cyan-glow: #0284c7;
+      --blue-accent: #1d4ed8;
+      --emerald-accent: #059669;
+      --text-main: #0f172a;
+      --text-muted: #334155;
+      --heading-gradient: linear-gradient(180deg, #0f172a 30%, #1e3a8a 100%);
+      --dropzone-bg: rgba(241, 245, 254, 0.95);
+      --dropzone-border: rgba(96, 165, 250, 0.55);
+      --dropzone-hover-bg: rgba(219, 234, 254, 0.9);
+      --chip-bg: #ffffff;
+      --chip-border: #93c5fd;
+      --chip-text: #1e3a8a;
+      --toggle-bg: #ffffff;
+      --toggle-border: #93c5fd;
+      --toggle-text: #1d4ed8;
+      --ambient-bg: radial-gradient(ellipse 90% 70% at 75% 20%, rgba(96, 165, 250, 0.75) 0%, transparent 70%),
+                        radial-gradient(circle 800px at 15% 10%, rgba(56, 189, 248, 0.65) 0%, transparent 65%),
+                        linear-gradient(180deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%);
+      --grid-line-color: rgba(30, 64, 175, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* 1. Ambient Background Atmosphere */
+    .bg-canvas-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glows {
+      position: absolute;
+      inset: 0;
+      background: var(--ambient-bg);
+      filter: blur(40px);
+      transition: background 0.3s ease;
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-size: 44px 44px;
+      background-image: 
+        linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-line-color) 1px, transparent 1px);
+      mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+    }
+
+    #ocr-stream-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Theme Switch Button */
+    .theme-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 50;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--toggle-text);
+      background: var(--toggle-bg);
+      border: 1px solid var(--toggle-border);
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    /* 2. Main Content Container */
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 70px 24px 100px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid var(--card-border);
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--cyan-glow);
+      margin-bottom: 18px;
+      letter-spacing: 0.05em;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan-glow);
+      box-shadow: 0 0 8px var(--cyan-glow);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-size: clamp(2.3rem, 5vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      background: var(--heading-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 14px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* 3. Glassmorphic Verification Terminal */
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed var(--dropzone-border);
+      border-radius: 18px;
+      padding: 44px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: var(--dropzone-bg);
+      position: relative;
+      overflow: hidden;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--cyan-glow);
+      background: var(--dropzone-hover-bg);
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.2);
+    }
+
+    .upload-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid var(--dropzone-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      color: var(--cyan-glow);
+      font-size: 26px;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.18);
+    }
+
+    .drop-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .drop-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .sample-chips {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .chip-btn {
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      color: var(--chip-text);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--cyan-glow);
+      color: var(--cyan-glow);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Preview & Scanner Laser */
+    .preview-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      background: #020408;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .scan-laser {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #38bdf8 25%, #818cf8 75%, transparent);
+      box-shadow: 0 0 18px #38bdf8;
+      top: 0;
+      display: none;
+      animation: scanAnim 2.2s infinite ease-in-out;
+      z-index: 5;
+    }
+
+    @keyframes scanAnim {
+      0% { top: 4%; opacity: 0.8; }
+      50% { top: 92%; opacity: 1; }
+      100% { top: 4%; opacity: 0.8; }
+    }
+
+    .reset-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .reset-btn:hover {
+      background: rgba(239, 68, 68, 0.35);
+      border-color: rgba(239, 68, 68, 0.6);
+    }
+
+    .analyze-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #1d4ed8 100%);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.5);
+      transition: all 0.2s ease;
+      margin-top: 20px;
+    }
+
+    .analyze-btn:hover {
+      box-shadow: 0 8px 25px 0 rgba(56, 189, 248, 0.5);
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Theme Toggle Button -->
+  <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="Toggle visual theme">
+    <span id="themeToggleIcon">☀️</span>
+    <span id="themeToggleText">Light Mode</span>
+  </button>
+
+  <!-- Dynamic Label OCR Reading & Guideline Particle Grid -->
+  <div class="bg-canvas-container">
+    <div class="ambient-glows"></div>
+    <div class="grid-lines"></div>
+    <canvas id="ocr-stream-canvas"></canvas>
+  </div>
+
+  <div class="app-shell">
+    <header class="header">
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span>LMPC 2011 &bull; GUIDELINE FIELD COMPLIANCE ENGINE</span>
+      </div>
+      <h1>Food Label Scanner</h1>
+      <p class="subtitle">
+        Inspect packaged commodities for mandatory statutory declarations: Net Quantity font clearances, Unit Sale Price (USP), MRP, and Manufacturer credentials.
+      </p>
+    </header>
+
+    <!-- Upload Panel -->
+    <main class="glass-card">
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+        
+        <div class="upload-icon">&#8682;</div>
+        <div class="drop-title">Upload Packaging / Label Photo</div>
+        <div class="drop-sub">Drag & drop Front of Pack, PDP, or Nutrition Table (PNG, JPG, WEBP)</div>
+
+        <div class="sample-chips">
+          <button class="chip-btn" id="loadSampleCereal">Benchmark: Dairy Butter</button>
+          <button class="chip-btn" id="loadSampleSnack">Benchmark: Imported Soup</button>
+        </div>
+
+        <!-- Preview & Laser Area -->
+        <div class="preview-container" id="previewContainer">
+          <button class="reset-btn" id="resetBtn">Change Image</button>
+          <img id="previewImg" class="preview-img" src="" alt="Food Label Preview" />
+          <div class="scan-laser" id="scanLaser"></div>
+        </div>
+      </div>
+
+      <button class="analyze-btn" id="scanTriggerBtn">
+        <span>Scan & Verify LMPC Guidelines</span> &rarr;
+      </button>
+    </main>
+  </div>
+
+  <!-- OCR & GUIDELINE VERIFICATION BACKGROUND ENGINE -->
+  <script>
+    let isLightMode = false;
+
+    // Theme Switch Handler
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themeToggleIcon = document.getElementById("themeToggleIcon");
+    const themeToggleText = document.getElementById("themeToggleText");
+
+    themeToggleBtn.addEventListener("click", () => {
+      isLightMode = !isLightMode;
+      document.body.classList.toggle("light-theme", isLightMode);
+      themeToggleIcon.textContent = isLightMode ? "🌙" : "☀️";
+      themeToggleText.textContent = isLightMode ? "Dark Mode" : "Light Mode";
+    });
+
+    (function () {
+      const canvas = document.getElementById("ocr-stream-canvas");
+      const ctx = canvas.getContext("2d");
+      let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+      // Mouse tracking for interactive inspection threads
+      const mouse = { x: -1000, y: -1000, active: false };
+      window.addEventListener("mousemove", (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        mouse.active = true;
+      });
+      window.addEventListener("mouseleave", () => {
+        mouse.active = false;
+      });
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        ctx.scale(dpr, dpr);
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      // Statutory Label Field Tokens directly from Legal Metrology & Food Guidelines
+      const LABEL_TOKENS = [
+        "NET QTY 500g",
+        "MRP ₹280.00",
+        "USP: ₹0.56/g",
+        "RULE 6(1)(a) PASS",
+        "BATCH: L-2026",
+        "PKD: 08/2026",
+        "EXP: 12 MONTHS",
+        "MFG LIC #1001",
+        "PDP: 4.2mm HGT",
+        "ORIGIN: INDIA",
+        "SCHED-V COMPLIANT",
+        "E211 PRESERVATIVE",
+        "ALLERGEN: SOY",
+        "FSSAI 100140"
+      ];
+
+      const TOTAL_NODES = 55;
+
+      class LabelScanNode {
+        constructor() {
+          this.init(true);
+        }
+
+        init(randomY = false) {
+          this.x = Math.random() * width;
+          this.y = randomY ? Math.random() * height : height + Math.random() * 40;
+          this.text = LABEL_TOKENS[Math.floor(Math.random() * LABEL_TOKENS.length)];
+          this.type = Math.random() > 0.45 ? "TOKEN" : "RETICLE";
+          
+          this.alpha = Math.random() * 0.5 + 0.15;
+          this.fadeSpeed = (Math.random() * 0.008 + 0.003) * (Math.random() > 0.5 ? 1 : -1);
+          
+          this.vx = (Math.random() - 0.5) * 0.25;
+          this.vy = -(Math.random() * 0.35 + 0.15);
+          
+          this.boxSize = Math.random() * 14 + 16;
+          this.fontSize = Math.floor(Math.random() * 2) + 10;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.alpha += this.fadeSpeed;
+
+          if (this.alpha >= 0.75) {
+            this.alpha = 0.75;
+            this.fadeSpeed = -Math.abs(this.fadeSpeed);
+          } else if (this.alpha <= 0.08) {
+            this.fadeSpeed = Math.abs(this.fadeSpeed);
+          }
+
+          if (this.y < -40 || this.x < -40 || this.x > width + 40) {
+            this.init(false);
+          }
+        }
+
+        draw() {
+          const dx = this.x - mouse.x;
+          const dy = this.y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const isHovered = mouse.active && dist < 140;
+          
+          const currentAlpha = isHovered ? Math.min(1, this.alpha + 0.4) : this.alpha;
+          const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+          const dotRgb = isLightMode ? "4, 120, 87" : "52, 211, 153";
+
+          ctx.save();
+          ctx.translate(this.x, this.y);
+
+          if (this.type === "TOKEN") {
+            ctx.font = `600 ${this.fontSize}px ui-monospace, SFMono-Regular, Menlo, monospace`;
+            ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.95})`;
+            ctx.fillText(this.text, 0, 0);
+
+            ctx.beginPath();
+            ctx.arc(-6, -3, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${dotRgb}, ${currentAlpha})`;
+            ctx.fill();
+          } else {
+            const s = this.boxSize;
+            const arm = 5;
+            ctx.strokeStyle = `rgba(${strokeRgb}, ${currentAlpha * 0.85})`;
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.moveTo(-s, -s + arm); ctx.lineTo(-s, -s); ctx.lineTo(-s + arm, -s);
+            ctx.moveTo(s - arm, -s); ctx.lineTo(s, -s); ctx.lineTo(s, -s + arm);
+            ctx.moveTo(-s, s - arm); ctx.lineTo(-s, s); ctx.lineTo(-s + arm, s);
+            ctx.moveTo(s - arm, s); ctx.lineTo(s, s); ctx.lineTo(s, s - arm);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${strokeRgb}, ${currentAlpha})`;
+            ctx.fill();
+          }
+
+          ctx.restore();
+
+          if (isHovered) {
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - dist / 140) * 0.4})`;
+            ctx.lineWidth = 0.9;
+            ctx.stroke();
+          }
+        }
+      }
+
+      const nodes = Array.from({ length: TOTAL_NODES }, () => new LabelScanNode());
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        const strokeRgb = isLightMode ? "29, 78, 216" : "56, 189, 248";
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 95) {
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.strokeStyle = `rgba(${strokeRgb}, ${(1 - d / 95) * 0.12})`;
+              ctx.lineWidth = 0.7;
+              ctx.stroke();
+            }
+          }
+        }
+
+        for (let i = 0; i < nodes.length; i++) {
+          nodes[i].update();
+          nodes[i].draw();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+
+    /* ====================================================
+       IMAGE UPLOAD & SCANNER INTERACTION
+       ==================================================== */
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const previewContainer = document.getElementById("previewContainer");
+    const previewImg = document.getElementById("previewImg");
+    const scanLaser = document.getElementById("scanLaser");
+    const resetBtn = document.getElementById("resetBtn");
+    const scanTriggerBtn = document.getElementById("scanTriggerBtn");
+
+    dropzone.addEventListener("click", (e) => {
+      if (e.target !== resetBtn && !previewContainer.contains(e.target)) {
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        loadLabelImage(e.target.files[0]);
+      }
+    });
+
+    dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        loadLabelImage(e.dataTransfer.files[0]);
+      }
+    });
+
+    function loadLabelImage(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        previewImg.src = event.target.result;
+        previewContainer.style.display = "flex";
+        triggerLaserScan();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function triggerLaserScan() {
+      scanLaser.style.display = "block";
+      setTimeout(() => {
+        scanLaser.style.display = "none";
+      }, 3000);
+    }
+
+    resetBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      previewContainer.style.display = "none";
+      scanLaser.style.display = "none";
+      previewImg.src = "";
+      fileInput.value = "";
+    });
+
+    scanTriggerBtn.addEventListener("click", () => {
+      if (previewImg.src) {
+        triggerLaserScan();
+      } else {
+        fileInput.click();
+      }
+    });
+
+    // Preset Benchmark Buttons
+    document.getElementById("loadSampleCereal").addEventListener("click", (e) => {
+      e.stopPropagation();
+      previewImg.src = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80";
+      previewContainer.style.display = "flex";
+      triggerLaserScan();
+    });
+
+    document.getElementById("loadSampleSnack").addEventListener("click", (e) => {
+      e.stopPropagation();
+      previewImg.src = "https://images.unsplash.com/photo-1621996346565-e3d5d6281691?w=800&q=80";
+      previewContainer.style.display = "flex";
+      triggerLaserScan();
+    });
+  </script>
+</body>
+</html>
