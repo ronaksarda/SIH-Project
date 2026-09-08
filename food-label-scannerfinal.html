@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Label Scanner</title>
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --card-bg: rgba(15, 23, 42, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --emerald-glow: #10b981;
+      --cyan-glow: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Glows & Sparkle Canvas */
+    .bg-canvas-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-glows {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle 700px at 15% 15%, rgba(16, 185, 129, 0.14), transparent 70%),
+        radial-gradient(circle 800px at 85% 20%, rgba(6, 182, 212, 0.12), transparent 70%),
+        radial-gradient(circle 600px at 50% 90%, rgba(16, 185, 129, 0.08), transparent 75%);
+      filter: blur(40px);
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-size: 44px 44px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at 50% 40%, black 40%, transparent 90%);
+    }
+
+    #sparkle-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Main Container */
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 80px 24px 100px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      background: linear-gradient(180deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 580px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Glassmorphism Panel */
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    /* Upload & Scanner Zone */
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 48px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: rgba(255, 255, 255, 0.01);
+      position: relative;
+      overflow: hidden;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--emerald-glow);
+      background: rgba(16, 185, 129, 0.04);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.12);
+    }
+
+    .upload-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      color: var(--emerald-glow);
+      font-size: 26px;
+    }
+
+    .drop-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .drop-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .sample-chips {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .chip-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-btn:hover {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--emerald-glow);
+      color: #fff;
+    }
+
+    /* Image Preview & Laser Scan Effect */
+    .preview-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      background: #020408;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .scan-laser {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #10b981 30%, #38bdf8 70%, transparent);
+      box-shadow: 0 0 16px #10b981;
+      top: 0;
+      display: none;
+      animation: scanAnim 2.2s infinite ease-in-out;
+      z-index: 5;
+    }
+
+    @keyframes scanAnim {
+      0% { top: 4%; opacity: 0.8; }
+      50% { top: 92%; opacity: 1; }
+      100% { top: 4%; opacity: 0.8; }
+    }
+
+    .reset-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .reset-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    /* Action Button */
+    .analyze-btn {
+      width: 100%;
+      background: #10b981;
+      color: #06080c;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s ease;
+      margin-top: 20px;
+    }
+
+    .analyze-btn:hover {
+      background: #34d399;
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.5);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dynamic Starfield & Glow Canvas -->
+  <div class="bg-canvas-container">
+    <div class="ambient-glows"></div>
+    <div class="grid-lines"></div>
+    <canvas id="sparkle-canvas"></canvas>
+  </div>
+
+  <div class="app-shell">
+    <header class="header">
+      <h1>Food Label Scanner</h1>
+      <p class="subtitle">
+        Drop nutritional fact panels, ingredient lists, or product packaging images to scan and preview.
+      </p>
+    </header>
+
+    <!-- Upload Panel -->
+    <main class="glass-card">
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" />
+        
+        <div class="upload-icon">&#8682;</div>
+        <div class="drop-title">Upload Food Label Photo</div>
+        <div class="drop-sub">Drag & drop PNG, JPG, or WEBP (Max 15MB)</div>
+
+        <div class="sample-chips">
+          <button class="chip-btn" id="loadSampleCereal">Try Cereal Label</button>
+          <button class="chip-btn" id="loadSampleSnack">Try Energy Bar</button>
+        </div>
+
+        <!-- Preview & Laser Area -->
+        <div class="preview-container" id="previewContainer">
+          <button class="reset-btn" id="resetBtn">Change Image</button>
+          <img id="previewImg" class="preview-img" src="" alt="Food Label Preview" />
+          <div class="scan-laser" id="scanLaser"></div>
+        </div>
+      </div>
+
+      <button class="analyze-btn" id="scanTriggerBtn">
+        <span>Scan Label Image</span> &rarr;
+      </button>
+    </main>
+  </div>
+
+  <script>
+    /* ====================================================
+       STARFIELD & 4-POINT DIAMOND SPARKLE ENGINE
+       ==================================================== */
+    (function () {
+      const canvas = document.getElementById("sparkle-canvas");
+      const ctx = canvas.getContext("2d");
+      let width = 0, height = 0, dpr = window.devicePixelRatio || 1;
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        ctx.scale(dpr, dpr);
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      const PALETTE = [
+        "rgba(255, 255, 255,",
+        "rgba(52, 211, 153,", // Emerald
+        "rgba(6, 182, 212,",  // Cyan
+        "rgba(251, 191, 36,"  // Warm Amber
+      ];
+
+      class Sparkle {
+        constructor() { this.init(true); }
+
+        init(randomY = false) {
+          this.x = Math.random() * width;
+          this.y = randomY ? Math.random() * height : height + 15;
+          this.size = Math.random() * 2 + 0.6;
+          this.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+          this.alpha = Math.random() * 0.8;
+          this.fadeSpeed = (Math.random() * 0.012 + 0.005) * (Math.random() > 0.5 ? 1 : -1);
+          this.vx = (Math.random() - 0.5) * 0.3;
+          this.vy = -(Math.random() * 0.35 + 0.12);
+          this.isDiamond = Math.random() < 0.35;
+          this.spike = this.size * (Math.random() * 2.5 + 2.5);
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.alpha += this.fadeSpeed;
+
+          if (this.alpha >= 1) {
+            this.alpha = 1;
+            this.fadeSpeed = -Math.abs(this.fadeSpeed);
+          } else if (this.alpha <= 0.05) {
+            this.fadeSpeed = Math.abs(this.fadeSpeed);
+          }
+
+          if (this.y < -30 || this.x < -30 || this.x > width + 30) this.init(false);
+        }
+
+        draw() {
+          const a = Math.max(0, Math.min(1, this.alpha));
+          ctx.save();
+          ctx.translate(this.x, this.y);
+
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `${this.color} ${a})`;
+          ctx.shadowColor = `${this.color} 0.9)`;
+          ctx.shadowBlur = this.size * 5;
+          ctx.fill();
+
+          if (this.isDiamond && a > 0.3) {
+            const sp = this.spike * a;
+            const th = Math.max(0.6, this.size * 0.35);
+            ctx.fillStyle = `${this.color} ${a * 0.95})`;
+
+            ctx.beginPath();
+            ctx.moveTo(0, -sp); ctx.lineTo(th, 0); ctx.lineTo(0, sp); ctx.lineTo(-th, 0);
+            ctx.closePath(); ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(-sp, 0); ctx.lineTo(0, th); ctx.lineTo(sp, 0); ctx.lineTo(0, -th);
+            ctx.closePath(); ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+
+      const sparkles = Array.from({ length: 75 }, () => new Sparkle());
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        sparkles.forEach(s => { s.update(); s.draw(); });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    /* ====================================================
+       IMAGE UPLOAD & SCANNER INTERACTION
+       ==================================================== */
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const previewContainer = document.getElementById("previewContainer");
+    const previewImg = document.getElementById("previewImg");
+    const scanLaser = document.getElementById("scanLaser");
+    const resetBtn = document.getElementById("resetBtn");
+    const scanTriggerBtn = document.getElementById("scanTriggerBtn");
+
+    dropzone.addEventListener("click", (e) => {
+      if (e.target !== resetBtn && !previewContainer.contains(e.target)) {
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        loadLabelImage(e.target.files[0]);
+      }
+    });
+
+    dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        loadLabelImage(e.dataTransfer.files[0]);
+      }
+    });
+
+    function loadLabelImage(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        previewImg.src = event.target.result;
+        previewContainer.style.display = "flex";
+        triggerLaserScan();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function triggerLaserScan() {
+      scanLaser.style.display = "block";
+      setTimeout(() => {
+        scanLaser.style.display = "none";
+      }, 3000);
+    }
+
+    resetBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      previewContainer.style.display = "none";
+      scanLaser.style.display = "none";
+      previewImg.src = "";
+      fileInput.value = "";
+    });
+
+    scanTriggerBtn.addEventListener("click", () => {
+      if (previewImg.src) {
+        triggerLaserScan();
+      } else {
+        fileInput.click();
+      }
+    });
+
+    // Sample Label Buttons
+    document.getElementById("loadSampleCereal").addEventListener("click", (e) => {
+      e.stopPropagation();
+      previewImg.src = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80";
+      previewContainer.style.display = "flex";
+      triggerLaserScan();
+    });
+
+    document.getElementById("loadSampleSnack").addEventListener("click", (e) => {
+      e.stopPropagation();
+      previewImg.src = "https://images.unsplash.com/photo-1621996346565-e3d5d6281691?w=800&q=80";
+      previewContainer.style.display = "flex";
+      triggerLaserScan();
+    });
+  </script>
+</body>
+</html>
