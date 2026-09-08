@@ -1,0 +1,41 @@
+.env
+
+uploads/
+tests/
+scratch/
+reports/
+
+backend/__pycache__/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE configs
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# Environment variables (sensitive!)
+.env
+.env.local
+.env.*.local

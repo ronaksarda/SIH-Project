@@ -1,0 +1,180 @@
+{
+  "meta": {
+    "source": "Legal Metrology (Packaged Commodities) Rules, 2011",
+    "last_amended": "G.S.R. 629(E) dated 23-06-2017",
+    "disclaimer": "Rule numbers sourced from gazette text. Human legal verification recommended before production use."
+  },
+  "rules": [
+    {
+      "rule_id": "R6_1_a_name",
+      "rule_number": "Rule 6(1)(a)",
+      "rule_text": "Every package shall bear the name and address of the manufacturer or packer or importer.",
+      "applies_to_field": "manufacturer_name",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 9
+    },
+    {
+      "rule_id": "R6_1_a_addr",
+      "rule_number": "Rule 6(1)(a)",
+      "rule_text": "Every package shall bear the complete address of the manufacturer or packer or importer.",
+      "applies_to_field": "manufacturer_address",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 9
+    },
+    {
+      "rule_id": "R6_1_b_qty",
+      "rule_number": "Rule 6(1)(b)",
+      "rule_text": "Net quantity of the commodity in terms of standard unit of weight, measure or number.",
+      "applies_to_field": "net_quantity",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 10
+    },
+    {
+      "rule_id": "R6_1_b_unit",
+      "rule_number": "Rule 6(1)(b)",
+      "rule_text": "Net quantity must be declared in standard units (g, kg, ml, L, cm, m, or number).",
+      "applies_to_field": "unit",
+      "check_type": "regex",
+      "threshold_value": "^(g|kg|mg|ml|mL|l|L|cl|cm|m|mm|sq\\.?\\s?cm|sq\\.?\\s?m|pieces?|pcs?|nos?\\.?|units?|pairs?|sets?)$",
+      "severity": 8
+    },
+    {
+      "rule_id": "R6_1_c_date",
+      "rule_number": "Rule 6(1)(c)",
+      "rule_text": "Month and year in which the commodity is manufactured or packed or imported shall be mentioned.",
+      "applies_to_field": "manufacture_date",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 8
+    },
+    {
+      "rule_id": "R6_1_c_date_fmt",
+      "rule_number": "Rule 6(1)(c)",
+      "rule_text": "Date of manufacture/packing must include at least month and year.",
+      "applies_to_field": "manufacture_date",
+      "check_type": "regex",
+      "threshold_value": "(\\d{1,2}[/\\-.]\\d{2,4})|(\\d{4}[/\\-.]\\d{1,2})|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s*\\d{2,4}|\\d{1,2}\\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?\\s*\\d{2,4}",
+      "severity": 6
+    },
+    {
+      "rule_id": "R6_1_d_mrp",
+      "rule_number": "Rule 6(1)(d)",
+      "rule_text": "Retail sale price of the package (MRP) inclusive of all taxes shall be declared.",
+      "applies_to_field": "mrp",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 10
+    },
+    {
+      "rule_id": "R6_1_d_mrp_fmt",
+      "rule_number": "Rule 6(1)(d)",
+      "rule_text": "MRP must be a numeric value (may include Rs/₹ prefix and decimal).",
+      "applies_to_field": "mrp",
+      "check_type": "regex",
+      "threshold_value": "(rs\\.?|₹|inr|mrp\\.?\\s*:?\\s*)\\s*\\d+(\\.\\d{1,2})?|\\d+(\\.\\d{1,2})?",
+      "severity": 7
+    },
+    {
+      "rule_id": "R6_1_e_consumer",
+      "rule_number": "Rule 6(1)(e)",
+      "rule_text": "Consumer care details including address, telephone, email of the person/office who can be contacted in case of complaint.",
+      "applies_to_field": "consumer_care",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 8
+    },
+    {
+      "rule_id": "R6_1_f_origin",
+      "rule_number": "Rule 6(1)(f)",
+      "rule_text": "For imported packages, country of origin shall be declared.",
+      "applies_to_field": "country_of_origin",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 7
+    },
+    {
+      "rule_id": "R6_1_g_expiry",
+      "rule_number": "Rule 6(1)(g)",
+      "rule_text": "Best before or use by date or expiry date shall be mentioned on the package.",
+      "applies_to_field": "best_before_expiry",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 8
+    },
+    {
+      "rule_id": "R7_font_size_slab1",
+      "rule_number": "Rule 7 / Table I",
+      "rule_text": "For PDP area < 50 sq.cm: minimum height of numerals/letters = 1mm (printed), 2mm (blown/molded).",
+      "applies_to_field": "net_quantity_font_mm",
+      "check_type": "min_font_size",
+      "threshold_value": 1.0,
+      "pdp_area_max_cm2": 50,
+      "severity": 6
+    },
+    {
+      "rule_id": "R7_font_size_slab2",
+      "rule_number": "Rule 7 / Table I",
+      "rule_text": "For PDP area 50-100 sq.cm: minimum height of numerals/letters = 1.5mm.",
+      "applies_to_field": "net_quantity_font_mm",
+      "check_type": "min_font_size",
+      "threshold_value": 1.5,
+      "pdp_area_min_cm2": 50,
+      "pdp_area_max_cm2": 100,
+      "severity": 6
+    },
+    {
+      "rule_id": "R7_font_size_slab3",
+      "rule_number": "Rule 7 / Table I",
+      "rule_text": "For PDP area 100-500 sq.cm: minimum height of numerals/letters = 2.5mm.",
+      "applies_to_field": "net_quantity_font_mm",
+      "check_type": "min_font_size",
+      "threshold_value": 2.5,
+      "pdp_area_min_cm2": 100,
+      "pdp_area_max_cm2": 500,
+      "severity": 6
+    },
+    {
+      "rule_id": "R7_font_size_slab4",
+      "rule_number": "Rule 7 / Table I",
+      "rule_text": "For PDP area 500-2500 sq.cm: minimum height of numerals/letters = 4mm.",
+      "applies_to_field": "net_quantity_font_mm",
+      "check_type": "min_font_size",
+      "threshold_value": 4.0,
+      "pdp_area_min_cm2": 500,
+      "pdp_area_max_cm2": 2500,
+      "severity": 6
+    },
+    {
+      "rule_id": "R7_font_size_slab5",
+      "rule_number": "Rule 7 / Table I",
+      "rule_text": "For PDP area >= 2500 sq.cm: minimum height of numerals/letters = 6mm.",
+      "applies_to_field": "net_quantity_font_mm",
+      "check_type": "min_font_size",
+      "threshold_value": 6.0,
+      "pdp_area_min_cm2": 2500,
+      "pdp_area_max_cm2": 999999,
+      "severity": 6
+    },
+    {
+      "rule_id": "R7_font_width",
+      "rule_number": "Rule 7(3)",
+      "rule_text": "Width of letter/numeral shall not be less than one-third of its height (except numeral 1, letters i, I, l).",
+      "applies_to_field": "net_quantity_font_width_ratio",
+      "check_type": "min_ratio",
+      "threshold_value": 0.333,
+      "severity": 5
+    },
+    {
+      "rule_id": "R6_batch",
+      "rule_number": "Rule 6(2)",
+      "rule_text": "Batch number or lot number or code number of the commodity shall be mentioned.",
+      "applies_to_field": "batch_no",
+      "check_type": "presence",
+      "threshold_value": null,
+      "severity": 6
+    }
+  ]
+}

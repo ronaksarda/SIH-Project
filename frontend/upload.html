@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabelSure AI — Legal Metrology Compliance Inspection</title>
+    <meta name="description" content="AI/ML Automated Verification for Packaged Commodities under Legal Metrology (Packaged Commodities) Rules, 2011">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        body {
+            background-color: #070913;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-subtle {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .neon-border-indigo {
+            box-shadow: 0 0 30px -5px rgba(99, 102, 241, 0.3);
+        }
+
+        .upload-dropzone {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .upload-dropzone:hover, .upload-dropzone.dragover {
+            border-color: #818cf8;
+            background: rgba(99, 102, 241, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.3);
+        }
+
+        .gradient-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
+            box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.5);
+            transition: all 0.25s ease;
+        }
+        .gradient-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px 0 rgba(99, 102, 241, 0.65);
+            filter: brightness(1.1);
+        }
+        .gradient-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .gradient-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Scanning Laser Beam Effect */
+        .scan-overlay {
+            position: relative;
+            overflow: hidden;
+        }
+        .laser-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, #c084fc, transparent);
+            box-shadow: 0 0 15px 4px rgba(56, 189, 248, 0.7);
+            animation: scanLaser 1.8s ease-in-out infinite alternate;
+        }
+        @keyframes scanLaser {
+            0% { top: 0%; opacity: 0.8; }
+            100% { top: 98%; opacity: 1; }
+        }
+
+        .pulse-dot {
+            animation: pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .4; transform: scale(1.15); }
+        }
+
+        .chip-btn {
+            transition: all 0.15s ease;
+        }
+        .chip-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col justify-between p-4 md:p-6 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+
+    <!-- Top Navigation Bar -->
+    <header class="w-full max-w-5xl mx-auto mb-6">
+        <div class="glass-panel rounded-2xl px-5 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-500 p-[1px] shadow-lg shadow-indigo-500/20">
+                    <div class="w-full h-full bg-[#0d1326] rounded-[11px] flex items-center justify-center">
+                        <svg class="w-5 h-5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+                            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+                            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+                            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+                            <rect x="7" y="7" width="10" height="10" rx="1"></rect>
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-bold text-base tracking-tight text-white">LabelSure™ AI</span>
+                        <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">LMPC 2011</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-medium">Department of Consumer Affairs • Legal Metrology Inspection</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center gap-2 text-xs text-slate-400 bg-slate-900/60 px-3 py-1.5 rounded-full border border-slate-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
+                    <span>AI Engine Online</span>
+                </div>
+                <a href="/static/dashboard.html" class="flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white px-3 py-1.5 rounded-lg glass-subtle hover:border-slate-700 transition">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    Dashboard
+                </a>
+                <a href="/static/login.html" class="text-xs font-semibold text-slate-400 hover:text-slate-200 transition">Portal Login</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-2xl mx-auto my-auto">
+        <div class="glass-panel rounded-3xl p-6 sm:p-9 neon-border-indigo relative overflow-hidden">
+            
+            <!-- Ambient Glow Spots -->
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Header Section -->
+            <div class="text-center mb-6 relative">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium mb-3">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Rule 6 & Rule 7 Verification Suite
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+                    Packaged Commodity Audit
+                </h1>
+                <p class="text-slate-400 text-sm max-w-md mx-auto">
+                    Inspect physical labels or digital marketplace listings for statutory compliance with Indian Legal Metrology Rules.
+                </p>
+            </div>
+
+            <!-- Quick Demo Preset Chips -->
+            <div class="mb-5 pb-4 border-b border-slate-800/80">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-semibold tracking-wider uppercase text-slate-400">⚡ Quick Demo Samples</span>
+                    <span class="text-[11px] text-slate-500">1-click test</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" id="demo-compliant" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
+                        <span class="text-emerald-400 text-sm">✓</span> Domestic FMCG Pack (Compliant)
+                    </button>
+                    <button type="button" id="demo-imported" class="chip-btn glass-subtle text-xs text-slate-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-slate-700/60">
+                        <span class="text-amber-400 text-sm">⚠</span> Imported US Soup (No INR MRP)
+                    </button>
+                </div>
+            </div>
+
+            <form id="scan-form">
+                <!-- Dropzone Zone -->
+                <div id="upload-zone" class="upload-dropzone border-2 border-dashed border-slate-700 rounded-2xl p-6 sm:p-8 text-center cursor-pointer mb-5 relative group bg-slate-900/40">
+                    <div id="upload-prompt">
+                        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-300">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <p class="text-slate-200 text-sm font-medium mb-1">
+                            Drop label photo here or <span class="text-indigo-400 underline decoration-indigo-400/50 underline-offset-2">browse files</span>
+                        </p>
+                        <p class="text-slate-500 text-xs">Supports JPG, PNG, WebP • High resolution recommended</p>
+                    </div>
+
+                    <!-- Image Preview Area with Laser Scan Beam -->
+                    <div id="preview-area" class="hidden scan-overlay relative rounded-xl overflow-hidden">
+                        <div id="laser-beam" class="hidden laser-line z-20"></div>
+                        <img id="preview-img" class="mx-auto rounded-xl max-h-64 object-contain shadow-md border border-slate-700/50 bg-black/40">
+                        <div class="mt-3 flex items-center justify-center gap-3">
+                            <span id="file-badge" class="font-mono text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-md border border-slate-700 truncate max-w-xs"></span>
+                            <button type="button" id="clear-btn" class="text-rose-400 hover:text-rose-300 text-xs font-semibold px-2 py-1 rounded bg-rose-500/10 hover:bg-rose-500/20 transition">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+
+                    <input type="file" id="file-input" name="image" accept="image/*" class="hidden">
+                </div>
+
+                <!-- Product Link Input (Amazon, Flipkart, Direct Image URL) -->
+                <div class="mb-5">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-slate-300 text-xs font-medium flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                            Product Link (Amazon, Flipkart, E-Commerce, or Image URL)
+                        </label>
+                        <span class="text-[11px] text-slate-500">Optional if photo uploaded</span>
+                    </div>
+                    <input type="url" id="product-link" name="product_link" placeholder="https://www.amazon.in/dp/... or https://domain.com/product"
+                        class="w-full bg-slate-900/60 border border-slate-700/80 rounded-xl px-4 py-2.5 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition">
+                    <p class="text-slate-500 text-[11px] mt-1.5">If only a link is given, our scraper downloads the product images and cross-verifies digital declarations.</p>
+                </div>
+
+                <!-- Error Display -->
+                <div id="error-box" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-xl p-3.5 mb-5 flex items-start gap-2.5">
+                    <svg class="w-5 h-5 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p id="error-text" class="text-rose-300 text-xs font-medium"></p>
+                </div>
+
+                <!-- Progress Terminal Checklist during scan -->
+                <div id="progress-terminal" class="hidden bg-slate-950/80 border border-indigo-500/30 rounded-xl p-3.5 mb-5 font-mono text-xs text-slate-300 space-y-1.5 shadow-inner">
+                    <div class="flex items-center gap-2 text-indigo-400 font-semibold border-b border-slate-800 pb-1.5 mb-1.5">
+                        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+                        <span>Multi-Stage Metrology Verification Active</span>
+                    </div>
+                    <div id="step-1" class="flex items-center gap-2 text-slate-400">
+                        <span class="step-icon">○</span> 1. Pre-flight image sharpness & resolution audit...
+                    </div>
+                    <div id="step-2" class="flex items-center gap-2 text-slate-400">
+                        <span class="step-icon">○</span> 2. Groq Multimodal Vision parsing label topography...
+                    </div>
+                    <div id="step-3" class="flex items-center gap-2 text-slate-400">
+                        <span class="step-icon">○</span> 3. OCR Engine cross-referencing printed text & font size...
+                    </div>
+                    <div id="step-4" class="flex items-center gap-2 text-slate-400">
+                        <span class="step-icon">○</span> 4. Rule Engine validating against 16 LMPC 2011 mandates...
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="scan-btn" class="gradient-btn w-full py-3.5 rounded-xl text-white font-heading font-semibold text-sm tracking-wide disabled:opacity-40 flex items-center justify-center gap-2" disabled>
+                    <svg id="btn-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span id="btn-text">Audit Product Compliance</span>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-5xl mx-auto mt-6 text-center text-slate-500 text-xs">
+        <p>Smart India Hackathon • Problem Statement SIH26034 • Legal Metrology (Packaged Commodities) Rules, 2011</p>
+    </footer>
+
+    <script>
+        const API = window.location.origin;
+        const zone = document.getElementById('upload-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewArea = document.getElementById('preview-area');
+        const uploadPrompt = document.getElementById('upload-prompt');
+        const previewImg = document.getElementById('preview-img');
+        const fileBadge = document.getElementById('file-badge');
+        const clearBtn = document.getElementById('clear-btn');
+        const scanBtn = document.getElementById('scan-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnIcon = document.getElementById('btn-icon');
+        const errorBox = document.getElementById('error-box');
+        const errorText = document.getElementById('error-text');
+        const form = document.getElementById('scan-form');
+        const productLinkInput = document.getElementById('product-link');
+        const laserBeam = document.getElementById('laser-beam');
+        const progressTerminal = document.getElementById('progress-terminal');
+
+        let selectedFile = null;
+
+        function updateScanButtonState() {
+            const hasFile = selectedFile !== null;
+            const hasLink = productLinkInput.value.trim().length > 0;
+            scanBtn.disabled = !hasFile && !hasLink;
+
+            if (hasFile && hasLink) {
+                btnText.textContent = 'Audit Label & Verify E-Commerce Listing';
+            } else if (hasFile) {
+                btnText.textContent = 'Audit Label Compliance';
+            } else if (hasLink) {
+                btnText.textContent = 'Fetch & Audit Product Link';
+            } else {
+                btnText.textContent = 'Audit Product Compliance';
+            }
+        }
+
+        zone.addEventListener('click', () => fileInput.click());
+        zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetUpload();
+        });
+
+        productLinkInput.addEventListener('input', updateScanButtonState);
+        productLinkInput.addEventListener('paste', () => setTimeout(updateScanButtonState, 50));
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) { showError('Please select a valid image file (JPG, PNG, WebP).'); return; }
+            if (file.size > 20 * 1024 * 1024) { showError('File exceeds 20MB limit. Please upload a smaller image.'); return; }
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                fileBadge.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                uploadPrompt.classList.add('hidden');
+                previewArea.classList.remove('hidden');
+                updateScanButtonState();
+                hideError();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetUpload() {
+            selectedFile = null;
+            fileInput.value = '';
+            uploadPrompt.classList.remove('hidden');
+            previewArea.classList.add('hidden');
+            laserBeam.classList.add('hidden');
+            updateScanButtonState();
+        }
+
+        function showError(msg) { errorText.textContent = msg; errorBox.classList.remove('hidden'); }
+        function hideError() { errorBox.classList.add('hidden'); }
+
+        // Demo Presets Handler
+        document.getElementById('demo-compliant').addEventListener('click', async () => {
+            hideError();
+            try {
+                const res = await fetch('/static/samples/sample_compliant.png');
+                const blob = await res.blob();
+                const file = new File([blob], 'demo_parle_compliant.png', { type: 'image/png' });
+                handleFile(file);
+            } catch {
+                showError('Could not load demo sample. Please upload manually.');
+            }
+        });
+
+        document.getElementById('demo-imported').addEventListener('click', async () => {
+            hideError();
+            try {
+                const res = await fetch('/static/samples/sample_imported.jpg');
+                const blob = await res.blob();
+                const file = new File([blob], 'demo_pacific_soup.jpg', { type: 'image/jpeg' });
+                handleFile(file);
+            } catch {
+                showError('Could not load demo sample. Please upload manually.');
+            }
+        });
+
+        // Step-by-step progress visualizer
+        function simulateSteps() {
+            const steps = [
+                document.getElementById('step-1'),
+                document.getElementById('step-2'),
+                document.getElementById('step-3'),
+                document.getElementById('step-4'),
+            ];
+            steps.forEach((s, i) => {
+                setTimeout(() => {
+                    s.classList.remove('text-slate-400');
+                    s.classList.add('text-indigo-300');
+                    s.querySelector('.step-icon').textContent = '▶';
+                    if (i > 0) {
+                        steps[i-1].classList.remove('text-indigo-300');
+                        steps[i-1].classList.add('text-emerald-400');
+                        steps[i-1].querySelector('.step-icon').textContent = '✓';
+                    }
+                }, i * 900);
+            });
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const linkVal = productLinkInput.value.trim();
+
+            if (!selectedFile && !linkVal) {
+                showError('Please upload a product label photo or enter an e-commerce product link.');
+                return;
+            }
+
+            hideError();
+            scanBtn.disabled = true;
+            laserBeam.classList.remove('hidden');
+            progressTerminal.classList.remove('hidden');
+            btnText.textContent = 'Auditing against LMPC Rules…';
+            btnIcon.classList.add('animate-spin');
+
+            simulateSteps();
+
+            const fd = new FormData();
+            if (selectedFile) fd.append('image', selectedFile);
+            if (linkVal) fd.append('product_link', linkVal);
+
+            try {
+                const res = await fetch(`${API}/scan`, { method: 'POST', body: fd });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showError(data.detail || 'Scan processing failed. Please try again.');
+                    return;
+                }
+
+                // Complete all steps
+                ['step-1', 'step-2', 'step-3', 'step-4'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.className = 'flex items-center gap-2 text-emerald-400';
+                    el.querySelector('.step-icon').textContent = '✓';
+                });
+
+                // Store result and navigate to results page
+                sessionStorage.setItem('scan_result', JSON.stringify(data));
+                setTimeout(() => {
+                    window.location.href = '/static/results.html';
+                }, 400);
+
+            } catch (err) {
+                showError('Network error connecting to backend API. Please verify the server is running.');
+            } finally {
+                laserBeam.classList.add('hidden');
+                updateScanButtonState();
+                btnIcon.classList.remove('animate-spin');
+            }
+        });
+    </script>
+</body>
+</html>
