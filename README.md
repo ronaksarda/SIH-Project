@@ -46,8 +46,8 @@ LabelSure AI is an automated compliance verification engine designed for Indian 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/ronaksarda/SIH_WINNER.git
-cd SIH_WINNER
+git clone https://github.com/ronaksarda/SIH_Project.git
+cd SIH_Project
 ```
 
 ### 2. Set Up Virtual Environment
