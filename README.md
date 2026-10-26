@@ -474,4 +474,4 @@ docker run -p 8000:8000 --env-file .env labelsure-ai
 
 ## License
 
-Developed for the Smart India Hackathon (SIH). Distributed under the MIT License.
+Developed for the Smart India Hackathon (SIH). All rights reserved. See `LICENSE`.
